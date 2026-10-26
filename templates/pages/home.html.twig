@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% set settings = site_settings() %}
+
+{% block title %}{{ settings.siteName }}, vitraux faits main à {{ settings.city }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <section class="hero" aria-labelledby="accueil-titre">
+            <twig:Shards />
+            <div class="hero__text stack">
+                <h1 id="accueil-titre" class="hero__title">{{ settings.homeTitle }}</h1>
+                <p class="hero__lead">{{ settings.homeIntro }}</p>
+                <div class="cluster">
+                    <a class="btn btn--primary" href="{{ path('app_shop') }}">Voir la boutique</a>
+                    <a class="btn btn--text" href="{{ path('app_page', {slug: 'l-atelier'}) }}">Découvrir l'atelier</a>
+                </div>
+            </div>
+            <div class="hero__art lancet">
+                <twig:GlassArt motif="lune" :decorative="true" />
+            </div>
+        </section>
+
+        {% if selection is not empty %}
+            <section class="section" aria-labelledby="accueil-creations">
+                <div class="section__head">
+                    <h2 id="accueil-creations">Créations disponibles</h2>
+                    <a class="btn btn--text" href="{{ path('app_shop') }}">Toute la boutique</a>
+                </div>
+                <div class="grid-cards">
+                    {% for view in selection %}
+                        {{ include('shop/_card.html.twig') }}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,9 +1,11 @@
 {#
     Illustration provisoire en verre, affichée tant qu'un produit n'a pas de photo.
     Usage : <twig:GlassArt motif="insecte" />  (motifs : insecte, fleurs, lune, defaut)
+    decorative = true : purement décorative, ignorée par les lecteurs d'écran.
 #}
-{% props motif = 'defaut', label = 'Illustration provisoire, photo à venir' %}
-<svg {{ attributes.defaults({class: 'glass-art glass-art--' ~ motif, viewBox: '0 0 200 266', role: 'img', 'aria-label': label, preserveAspectRatio: 'xMidYMid slice'}) }}>
+{% props motif = 'defaut', label = 'Illustration provisoire, photo à venir', decorative = false %}
+{% set a11y = decorative ? {'aria-hidden': 'true', focusable: 'false'} : {role: 'img', 'aria-label': label} %}
+<svg {{ attributes.defaults({class: 'glass-art glass-art--' ~ motif, viewBox: '0 0 200 266', preserveAspectRatio: 'xMidYMid slice'}|merge(a11y)) }}>
     <g class="glass-art__lead">
     {% if motif == 'insecte' %}
         <path class="glass-art__sky" d="M100 96 C70 68 30 78 34 108 C38 134 80 130 100 118 Z"/>

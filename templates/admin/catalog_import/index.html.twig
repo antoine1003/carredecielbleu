@@ -1,0 +1,27 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title 'Importer le catalogue SumUp' %}
+{% block content_title 'Importer le catalogue SumUp' %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-lg-8">
+            <p>Dans SumUp, exportez la liste de vos articles au format CSV, puis déposez le fichier ici. Vous verrez les changements avant de les valider.</p>
+            <ul>
+                <li>Mis à jour : nom, description, catégorie, prix, stock, variantes.</li>
+                <li>Jamais modifiés : photos, histoire, technique, dimensions, visibilité, lien d'achat, mise en avant.</li>
+                <li>Un produit absent du fichier est marqué « non synchronisé » et masqué du site, jamais supprimé.</li>
+            </ul>
+
+            <form method="post" action="{{ path('admin_catalog_import_preview') }}" enctype="multipart/form-data" class="mt-4">
+                <input type="hidden" name="_token" value="{{ csrf_token('catalog_import_upload') }}">
+                <div class="mb-3">
+                    <label for="csv" class="form-label">Fichier CSV exporté depuis SumUp</label>
+                    <input type="file" id="csv" name="csv" accept=".csv,text/csv" required class="form-control" aria-describedby="csv-help">
+                    <div id="csv-help" class="form-text">Format .csv, 5 Mo maximum.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Voir les changements</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

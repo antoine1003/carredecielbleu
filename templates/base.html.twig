@@ -3,7 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{% block title %}Carré de ciel bleu{% endblock %}</title>
+        <title>{% block title %}{{ site_settings().siteName }}{% endblock %}</title>
+        <meta name="description" content="{% block description %}{{ site_settings().homeMetaDescription }}{% endblock %}">
         {% block meta %}{% endblock %}
         <link rel="preload" href="{{ asset('fonts/gloock-latin-400-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
         <link rel="preload" href="{{ asset('fonts/nunito-sans-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>

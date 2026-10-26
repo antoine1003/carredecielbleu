@@ -36,3 +36,14 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Contrastes AA vérifiés : le vert « salicorne » (#6E9A4F) ne sert qu'au décor ; une variante foncée (#476F30) sert au texte « En stock ».
 - Visuels provisoires en verre (`<twig:GlassArt>`) tant que les photos ne sont pas uploadées.
 - Pas de menu burger : 4 liens de navigation qui passent à la ligne, aucun JS nécessaire.
+
+## 2026-10-26 — Boutique et import CSV (phase 2)
+
+- Base de données : MariaDB/MySQL (SQL relationnel), via Doctrine ORM. Tables InnoDB + utf8mb4 imposées dans la config (le MariaDB de WAMP crée du MyISAM par défaut, sans clés étrangères).
+- Modèle : `Product` → `ProductVariant` (au moins une, prix/stock propres) et `ProductImage` ; `Category` reconnue par son nom SumUp (`sumupName`), son nom affiché reste modifiable.
+- Produit ou variante « non synchronisé » = retiré de SumUp : conservé en base, masqué du site public.
+- Prix à 0 € (bon cadeau) affiché « Prix sur demande ».
+- Produit épuisé masqué → sa page renvoie 404 (à revoir en phase SEO : 410 ou redirection).
+- Admin livré dès cette phase (connexion, produits, catégories, pages, réglages, écran d'import) car l'import doit être protégé ; les finitions restent en phase 4 (photos, tableau de bord, ateliers).
+- Écran d'import : upload → aperçu des changements champ par champ → validation. Fichier stocké hors `public/` (`var/imports/`), nom aléatoire, supprimé après usage ou au bout d'une heure.
+- Nouvelles dépendances légères : `twig/string-extra` (troncature des meta descriptions), `symfony/clock`, `symfony/ux-twig-component` déclaré explicitement.

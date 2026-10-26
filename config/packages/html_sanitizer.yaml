@@ -1,0 +1,27 @@
+framework:
+    html_sanitizer:
+        sanitizers:
+            # Texte riche des produits et des pages (import SumUp, saisie admin).
+            # Utilisé à l'import ET à l'affichage (filtre Twig sanitize_html('app.rich_text')).
+            app.rich_text:
+                allow_elements:
+                    p: []
+                    br: []
+                    strong: []
+                    b: []
+                    em: []
+                    i: []
+                    ul: []
+                    ol: []
+                    li: []
+                    h2: []
+                    h3: []
+                    blockquote: []
+                    a: [href, title]
+                block_elements: [span, div, font, u]
+                allowed_link_schemes: [https, mailto, tel]
+                allow_relative_links: true
+                force_https_urls: true
+                force_attributes:
+                    a:
+                        rel: noopener noreferrer

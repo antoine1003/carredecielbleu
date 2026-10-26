@@ -28,11 +28,11 @@ Puis :
 ```bash
 php bin/console doctrine:database:create --if-not-exists
 php bin/console doctrine:migrations:migrate
-php bin/console doctrine:fixtures:load   # données de démo, jamais en prod
+php bin/console doctrine:fixtures:load   # données de démo, jamais en prod (admin local : admin@carredecielbleu.test, mot de passe FIXTURES_ADMIN_PASSWORD dans .env.dev)
 symfony serve -d
 ```
 
-Le site est servi sur https://127.0.0.1:8000. En dev, les emails partent vers Mailpit (`smtp://127.0.0.1:1025`, interface sur http://localhost:8025).
+Le site est servi sur https://127.0.0.1:8000 ; l'administration sur /admin (connexion : /admin/connexion). En dev, les emails partent vers Mailpit (`smtp://127.0.0.1:1025`, interface sur http://localhost:8025).
 
 ## Commandes utiles
 
@@ -40,7 +40,8 @@ Le site est servi sur https://127.0.0.1:8000. En dev, les emails partent vers Ma
 |---|---|
 | `composer qa` | PHPStan + php-cs-fixer (dry-run) — doit être vert avant chaque commit de phase |
 | `composer cs-fix` | Corrige le style de code |
-| `php bin/console app:catalog:import <fichier.csv>` | Import du catalogue depuis l'export SumUp (disponible en phase 2) |
+| `php bin/console app:catalog:import <fichier.csv> [--dry-run]` | Import du catalogue depuis l'export SumUp (aussi disponible dans l'admin) |
+| `php bin/console app:admin:create <email>` | Crée un compte administrateur (mot de passe demandé de façon masquée) |
 | `php bin/console asset-map:compile` | Compile les assets pour la prod |
 
 Fichier d'exemple de l'export SumUp : [`docs/samples/sumup-export.csv`](docs/samples/sumup-export.csv).

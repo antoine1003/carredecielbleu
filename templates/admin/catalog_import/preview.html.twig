@@ -1,0 +1,71 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title 'Aperçu de l\'import' %}
+{% block content_title %}Aperçu de l'import : {{ report.sourceLabel }}{% endblock %}
+
+{% block main %}
+    <p class="lead">{{ report.summary }}</p>
+
+    {% if report.warnings is not empty %}
+        <div class="alert alert-warning" role="status">
+            <p class="mb-1"><strong>À vérifier</strong></p>
+            <ul class="mb-0">
+                {% for warning in report.warnings %}<li>{{ warning }}</li>{% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if report.created is not empty %}
+        <h2 class="h5 mt-4">Nouveaux produits ({{ report.created|length }})</h2>
+        <table class="table datagrid">
+            <thead><tr><th scope="col">Produit</th><th scope="col">Variantes</th><th scope="col">Sur le site</th></tr></thead>
+            <tbody>
+                {% for item in report.created %}
+                    <tr><td>{{ item.name }}</td><td>{{ item.variants }}</td><td>{{ item.visible ? 'visible' : 'masqué' }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if report.updated is not empty %}
+        <h2 class="h5 mt-4">Produits modifiés ({{ report.updated|length }})</h2>
+        <table class="table datagrid">
+            <thead><tr><th scope="col">Produit</th><th scope="col">Champ</th><th scope="col">Avant</th><th scope="col">Après</th></tr></thead>
+            <tbody>
+                {% for item in report.updated %}
+                    {% for change in item.changes %}
+                        <tr>
+                            {% if loop.first %}<th scope="rowgroup" rowspan="{{ item.changes|length }}">{{ item.name }}</th>{% endif %}
+                            <td>{{ change.field }}</td><td>{{ change.old }}</td><td>{{ change.new }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if report.notSynced is not empty %}
+        <h2 class="h5 mt-4">Absents du fichier ({{ report.notSynced|length }})</h2>
+        <p>Ils seront marqués « non synchronisé » et masqués du site. Ils ne sont pas supprimés.</p>
+        <ul>{% for name in report.notSynced %}<li>{{ name }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    {% if report.categoriesCreated is not empty %}
+        <h2 class="h5 mt-4">Nouvelles catégories</h2>
+        <ul>{% for name in report.categoriesCreated %}<li>{{ name }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+        {% if report.hasChanges %}
+            <form method="post" action="{{ path('admin_catalog_import_apply') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('catalog_import_apply' ~ fileId) }}">
+                <input type="hidden" name="file" value="{{ fileId }}">
+                <input type="hidden" name="label" value="{{ fileLabel }}">
+                <button type="submit" class="btn btn-primary">Valider l'import</button>
+            </form>
+        {% else %}
+            <p>Aucun changement : le catalogue du site est déjà à jour.</p>
+        {% endif %}
+        <a class="btn btn-secondary" href="{{ path('admin_catalog_import_index') }}">Annuler</a>
+    </div>
+{% endblock %}

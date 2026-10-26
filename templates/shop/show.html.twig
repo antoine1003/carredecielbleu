@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% set product = view.product %}
+{% set settings = site_settings() %}
+{% set main_image = product_image(product.images.first ?: null, '(min-width: 64rem) 34rem, 100vw') %}
+
+{% block title %}{{ product.sumupSeoTitle ?: product.name }} | {{ settings.siteName }}{% endblock %}
+{% block description %}{{ (product.sumupSeoDescription ?: (product.description ? product.description|striptags : product.name ~ ', vitrail fait main par ' ~ settings.siteName ~ '.'))|u.truncate(160, '…', false) }}{% endblock %}
+
+{% block body %}
+    <div class="container section">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+            <ol>
+                <li><a href="{{ path('app_shop') }}">Boutique</a></li>
+                {% if product.category and product.category.visible %}
+                    <li><a href="{{ path('app_shop_category', {slug: product.category.slug}) }}">{{ product.category.name }}</a></li>
+                {% endif %}
+                <li><span aria-current="page">{{ product.name }}</span></li>
+            </ol>
+        </nav>
+
+        <div class="product">
+            <div class="product__gallery">
+                <div class="lancet product__main-image">
+                    {% if main_image %}
+                        <img src="{{ main_image.src }}" srcset="{{ main_image.srcset }}" sizes="{{ main_image.sizes }}"
+                             width="{{ main_image.width }}" height="{{ main_image.height }}" alt="{{ main_image.alt }}" fetchpriority="high">
+                    {% else %}
+                        <twig:GlassArt :motif="glass_motif(product)" />
+                    {% endif %}
+                </div>
+                {% if product.images|length > 1 %}
+                    <ul class="product__thumbs">
+                        {% for image in product.images|slice(1) %}
+                            {% set attrs = product_image(image, '8rem') %}
+                            {% if attrs %}
+                                <li><img src="{{ attrs.src }}" srcset="{{ attrs.srcset }}" sizes="{{ attrs.sizes }}" width="{{ attrs.width }}" height="{{ attrs.height }}" alt="{{ attrs.alt }}" loading="lazy" decoding="async"></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="product__info stack">
+                <h1 class="product__title">{{ product.name }}</h1>
+                <p class="product__price">
+                    {% if view.price is not null %}
+                        {% if view.fromPrice %}à partir de {% endif %}{{ view.price|format_currency('EUR', locale: 'fr') }}
+                    {% else %}
+                        Prix sur demande
+                    {% endif %}
+                    <twig:Status :value="view.availability.value" />
+                </p>
+
+                {% if view.variants|length > 1 %}
+                    <table class="variants">
+                        <caption>Déclinaisons disponibles</caption>
+                        <thead><tr><th scope="col">Modèle</th><th scope="col">Prix</th><th scope="col">Disponibilité</th></tr></thead>
+                        <tbody>
+                            {% for row in view.variants %}
+                                <tr>
+                                    <th scope="row">{{ row.variant.name }}</th>
+                                    <td>{{ row.variant.priceCents ? (row.variant.priceCents / 100)|format_currency('EUR', locale: 'fr') : '—' }}</td>
+                                    <td><twig:Status :value="row.availability.value" /></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+
+                <div class="product__buy">
+                    {% if view.canBuy %}
+                        <a class="btn btn--primary" href="{{ product.purchaseUrl }}" target="_blank" rel="noopener noreferrer">
+                            Acheter sur SumUp
+                            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2 7 9"/></svg>
+                            <span class="visually-hidden">(nouvel onglet)</span>
+                        </a>
+                        <p class="product__note">Le paiement se fait sur SumUp, dans un nouvel onglet.</p>
+                    {% else %}
+                        <a class="btn btn--primary" href="{{ path('app_page', {slug: 'contact'}) }}">Me contacter</a>
+                        <p class="product__note">{{ view.availability.value == 'sold_out' ? 'Cette pièce est épuisée : écrivez-moi pour une création similaire.' : 'Écrivez-moi pour commander cette pièce.' }}</p>
+                    {% endif %}
+                </div>
+
+                {% if product.description %}
+                    <div class="prose">{{ product.description|sanitize_html('app.rich_text') }}</div>
+                {% endif %}
+                {% if product.story %}
+                    <div class="prose">{{ product.story|sanitize_html('app.rich_text') }}</div>
+                {% endif %}
+
+                {% if product.technique or product.dimensions or product.category %}
+                    <dl class="specs">
+                        {% if product.technique %}<div><dt>Technique</dt><dd>{{ product.technique }}</dd></div>{% endif %}
+                        {% if product.dimensions %}<div><dt>Dimensions</dt><dd>{{ product.dimensions }}</dd></div>{% endif %}
+                        {% if product.category %}<div><dt>Catégorie</dt><dd>{{ product.category.name }}</dd></div>{% endif %}
+                    </dl>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if related is not empty %}
+            <section class="section" aria-labelledby="produit-autres">
+                <div class="section__head"><h2 id="produit-autres">Dans la même famille</h2></div>
+                <div class="grid-cards">
+                    {% for view in related %}
+                        {{ include('shop/_card.html.twig') }}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

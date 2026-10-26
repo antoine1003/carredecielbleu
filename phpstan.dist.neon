@@ -10,3 +10,8 @@ parameters:
     tmpDir: var/phpstan
     symfony:
         containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    doctrine:
+        # Les propriétés éditées par formulaire (EasyAdmin, Symfony Forms) sont nullables
+        # alors que la colonne est NOT NULL : le formulaire appelle le setter avec null
+        # avant la validation (#[Assert\NotBlank]). Voir docs/decisions.md.
+        allowNullablePropertyForRequiredField: true

@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% set settings = site_settings() %}
+
+{% block title %}{% if category %}{{ category.name }}, vitraux faits main{% else %}La boutique{% endif %} | {{ settings.siteName }}{% endblock %}
+{% block description %}{% if category and category.description %}{{ category.description|u.truncate(160, '…') }}{% elseif category %}{{ category.name }} en vitrail Tiffany, pièces faites main par {{ settings.siteName }} à {{ settings.city }}.{% else %}Vitraux faits main par {{ settings.siteName }} : attrape-soleil, fleurs, insectes et créations en verre, à acheter sur SumUp.{% endif %}{% endblock %}
+
+{% block body %}
+    <div class="container section">
+        <div class="section__head">
+            <div>
+                <h1 class="page-title">{{ category ? category.name : 'La boutique' }}</h1>
+                {% if category and category.description %}<p class="section__intro">{{ category.description }}</p>{% endif %}
+                <p class="section__intro">Le paiement se fait sur SumUp, en toute sécurité.</p>
+            </div>
+        </div>
+
+        {% if categories|length > 1 %}
+            <nav class="filters" aria-label="Catégories">
+                <ul class="filters__list">
+                    <li><a class="chip" href="{{ path('app_shop') }}"{% if not category %} aria-current="page"{% endif %}>Tout</a></li>
+                    {% for item in categories %}
+                        <li><a class="chip" href="{{ path('app_shop_category', {slug: item.slug}) }}"{% if category and category.id == item.id %} aria-current="page"{% endif %}>{{ item.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+
+        {% if views is empty %}
+            <div class="empty-state">
+                <p>Aucune création disponible dans cette catégorie pour le moment.</p>
+                <a class="btn btn--secondary" href="{{ path('app_shop') }}">Voir toute la boutique</a>
+            </div>
+        {% else %}
+            <p class="visually-hidden" role="status">{{ views|length }} création{{ views|length > 1 ? 's' }}</p>
+            <div class="grid-cards">
+                {% for view in views %}
+                    {{ include('shop/_card.html.twig', {headingLevel: 2}) }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

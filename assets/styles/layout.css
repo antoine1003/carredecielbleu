@@ -8,7 +8,7 @@
 }
 
 .section {
-    padding-block: var(--space-8);
+    padding-block: clamp(var(--space-5), 5vw, var(--space-8));
 }
 
 .section + .section {

@@ -18,7 +18,8 @@ Site vitrine d'une artisane vitrailliste (auto-entreprise « Carré de ciel bleu
 symfony serve -d                       # serveur local
 php bin/console doctrine:migrations:migrate
 php bin/console doctrine:fixtures:load # données de démo (jamais en prod)
-php bin/console app:catalog:import <fichier.csv>   # import du CSV SumUp
+php bin/console app:catalog:import <fichier.csv> [--dry-run]   # import du CSV SumUp
+php bin/console app:admin:create <email>   # compte admin (mot de passe demandé masqué)
 php bin/console asset-map:compile      # assets de prod
 composer qa                            # phpstan + php-cs-fixer (dry-run)
 vendor/bin/phpstan analyse
@@ -64,7 +65,7 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Le mapping des colonnes du CSV est centralisé et configurable (un seul endroit : `SumupCsvParser`). Le fichier d'exemple réel est dans `docs/samples/`.
 - Clé de rapprochement : `sumupItemId` si présent, sinon `sku`.
 - L'import NE DOIT JAMAIS écraser les champs enrichis côté site (photos supplémentaires, dimensions, technique, texte d'histoire, visibilité, `purchaseUrl` saisi à la main). Il met à jour : nom, prix, stock, description de base, catégorie.
-- Produit absent du CSV → marqué « non synchronisé », jamais supprimé automatiquement.
+- Produit absent du CSV → marqué « non synchronisé » (et masqué du site public), jamais supprimé automatiquement. Idem pour une variante.
 - Variantes SumUp : entité `ProductVariant` (clé `sumupVariantId`, prix et stock propres). Dans le CSV, une ligne parente (Item id sans Variant id) est suivie de lignes sans nom portant `Variations` + `Variant id`. Prix public : « à partir de ».
 - Stock : `Track inventory = No` → stock non suivi = disponible (« Sur commande »). Stock suivi à 0 → comportement « épuisé » réglable (global dans les réglages, surchargeable par produit : masquer / afficher « Épuisé » / afficher « Sur commande »). Seuls les produits visibles sont publics.
 - `Display item in Online Store?` : valeur initiale de la visibilité à la création uniquement, jamais réécrite ensuite.
@@ -109,7 +110,7 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Secrets uniquement dans `.env.local` / variables d'environnement serveur. Ne jamais committer `.env.local`, de clés ou d'exports clients.
 - Données personnelles (inscriptions) : minimum nécessaire, durée de conservation documentée, export/suppression possible depuis l'admin.
 - Uploads : valider type et taille, renommer les fichiers, ne jamais exécuter ni servir depuis un chemin non contrôlé.
-- Admin : accès par rôle, mots de passe hashés, protection de la page de login.
+- Admin : accès par rôle, mots de passe hashés, protection de la page de login. Connexion sur `/admin/connexion` (gabarit EasyAdmin, CSRF, 5 tentatives/minute). En dev, les fixtures créent `admin@carredecielbleu.test` avec le mot de passe `FIXTURES_ADMIN_PASSWORD` de `.env.dev`.
 
 ## Qualité et workflow
 
@@ -139,5 +140,7 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - `config.platform.php = 8.4.1` dans composer.json : les dépendances restent compatibles avec la prod PHP 8.4 même si le poste local est en PHP 8.5.
 - Doctrine : les lazy objects natifs sont toujours actifs avec DoctrineBundle 3.x (l'option `enable_native_lazy_objects` est dépréciée) ; rien à configurer.
 - Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). Mailpit en local (`MAILER_DSN` dans `.env.dev`).
-- Base locale : MariaDB 11.3 de WAMP (port 3307), configurée dans `.env.local`.
+- Base locale : MariaDB 11.3 de WAMP (port 3307), configurée dans `.env.local`. Tables forcées en InnoDB + utf8mb4 (`default_table_options` dans doctrine.yaml).
+- PHPStan : `doctrine.allowNullablePropertyForRequiredField: true`, car les propriétés éditées par formulaire sont nullables (exigence Symfony Forms / EasyAdmin) alors que la colonne est NOT NULL.
+- Texte riche (descriptions, pages) : assaini avec le sanitizer `app.rich_text` à l'import ET à l'affichage (`|sanitize_html('app.rich_text')`).
 - Windows : passer les contraintes Composer avec `~` ou les écrire dans composer.json (`composer.bat` mange le caractère `^`).

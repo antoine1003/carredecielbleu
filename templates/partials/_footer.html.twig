@@ -1,10 +1,13 @@
-{# Ville et liens légaux branchés en phase 2 (réglages du site + pages de contenu). #}
+{% set settings = site_settings() %}
 <footer class="site-footer">
     <div class="container site-footer__inner">
-        <p>Carré de ciel bleu, vitraux faits main à [Ville]</p>
+        <p>{{ settings.siteName }}, vitraux faits main à {{ settings.city }}</p>
         <ul class="site-footer__links">
-            <li><a href="#">Mentions légales</a></li>
-            <li><a href="#">Politique de confidentialité</a></li>
+            {% if settings.instagramUrl %}<li><a href="{{ settings.instagramUrl }}" rel="noopener me">Instagram</a></li>{% endif %}
+            {% if settings.facebookUrl %}<li><a href="{{ settings.facebookUrl }}" rel="noopener me">Facebook</a></li>{% endif %}
+            {% for page in footer_pages() %}
+                <li><a href="{{ path('app_page', {slug: page.slug}) }}">{{ page.title }}</a></li>
+            {% endfor %}
         </ul>
     </div>
 </footer>

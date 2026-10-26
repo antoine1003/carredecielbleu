@@ -12,7 +12,7 @@
     fromPrice = false,
     status = 'available',
     purchaseUrl = null,
-    contactUrl = '#',
+    contactUrl = null,
     image = null,
     motif = 'defaut',
     headingLevel = 3,
@@ -45,7 +45,7 @@
                 <span class="visually-hidden">(nouvel onglet)</span>
             </a>
         {% else %}
-            <a class="btn btn--text" href="{{ contactUrl }}">Me contacter</a>
+            <a class="btn btn--text" href="{{ contactUrl ?? path('app_page', {slug: 'contact'}) }}">Me contacter</a>
         {% endif %}
     </div>
 </article>

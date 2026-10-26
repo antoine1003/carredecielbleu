@@ -1,0 +1,12 @@
+{# Carte produit à partir d'une ProductView (variables : view, headingLevel facultatif) #}
+<twig:ProductCard
+    :name="view.product.name"
+    :url="path('app_product', {slug: view.product.slug})"
+    :price="view.price"
+    :fromPrice="view.fromPrice"
+    :status="view.availability.value"
+    :purchaseUrl="view.canBuy ? view.product.purchaseUrl : null"
+    :image="product_image(view.product.images.first ?: null)"
+    :motif="glass_motif(view.product)"
+    :headingLevel="headingLevel ?? 3"
+/>

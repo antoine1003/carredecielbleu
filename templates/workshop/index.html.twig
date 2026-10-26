@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+{% import 'workshop/_macros.html.twig' as ui %}
+
+{% set settings = site_settings() %}
+
+{% block title %}Ateliers de vitrail à {{ settings.city }} | {{ settings.siteName }}{% endblock %}
+{% block description %}Ateliers d'initiation au vitrail Tiffany avec {{ settings.siteName }} à {{ settings.city }} : choisissez les dates qui vous conviennent et inscrivez-vous en ligne.{% endblock %}
+
+{% block body %}
+    <div class="container section">
+        <div class="section__head">
+            <div>
+                <h1 class="page-title">Ateliers de vitrail</h1>
+                <p class="section__intro">Cochez toutes les dates qui vous conviennent : la date retenue est confirmée par email.</p>
+            </div>
+        </div>
+        <div class="stack" style="--stack-gap: var(--space-3); margin-bottom: var(--space-6)">{{ include('partials/_flashes.html.twig') }}</div>
+
+        {% if workshops is empty %}
+            <div class="empty-state">
+                <p>Aucun atelier n'est programmé pour le moment. Revenez bientôt, ou écrivez-moi pour être prévenu·e des prochaines dates.</p>
+                <a class="btn btn--secondary" href="{{ path('app_page', {slug: 'contact'}) }}">Me contacter</a>
+            </div>
+        {% else %}
+            <ul class="workshop-list">
+                {% for workshop in workshops %}
+                    <li class="workshop-card">
+                        <div class="workshop-card__text stack">
+                            <h2 class="workshop-card__title"><a href="{{ path('app_workshop', {slug: workshop.slug}) }}">{{ workshop.title }}</a></h2>
+                            {% if workshop.summary %}<p>{{ workshop.summary }}</p>{% endif %}
+                            {% if workshop.duration or workshop.priceInfo %}
+                                <p class="workshop-card__meta">{{ [workshop.duration, workshop.priceInfo]|filter(v => v)|join(' · ') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="workshop-card__dates">
+                            {% if workshop.sessions is empty %}
+                                <p class="workshop-card__meta">Nouvelles dates bientôt.</p>
+                            {% else %}
+                                <p class="workshop-card__meta">{{ workshop.sessions|length }} date{{ workshop.sessions|length > 1 ? 's' }} proposée{{ workshop.sessions|length > 1 ? 's' }}, à partir du {{ workshop.sessions.first.startsAt|format_date('long', locale: 'fr') }}</p>
+                            {% endif %}
+                            <a class="btn btn--primary" href="{{ path('app_workshop', {slug: workshop.slug}) }}">Voir les dates<span class="visually-hidden"> de l'atelier {{ workshop.title }}</span></a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

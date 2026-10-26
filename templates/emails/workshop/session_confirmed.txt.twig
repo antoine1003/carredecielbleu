@@ -1,0 +1,19 @@
+{% autoescape false %}
+Bonjour {{ firstName }},
+
+Bonne nouvelle : l'atelier « {{ workshop.title }} » aura bien lieu à la date que vous aviez choisie :
+
+{{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}{% if session.effectiveLocation %}
+
+{{ session.effectiveLocation }}{% endif %}
+
+{% if workshop.duration %}Durée : {{ workshop.duration }}.
+{% endif %}
+{% if workshop.priceInfo %}Tarif : {{ workshop.priceInfo }}. Aucun paiement n'est demandé sur le site.
+{% endif %}
+
+Un empêchement ? Annulez votre inscription pour libérer la place : {{ cancelUrl }}
+
+À très bientôt à l'atelier,
+{{ site_settings().siteName }}
+{% endautoescape %}

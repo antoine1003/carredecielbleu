@@ -33,6 +33,11 @@ final class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(CategoryCrudController::class, 'Catégories', 'fa fa-tags');
         yield MenuItem::linkToRoute('Importer le catalogue SumUp', 'fa fa-file-import', 'admin_catalog_import_index');
 
+        yield MenuItem::section('Ateliers');
+        yield MenuItem::linkTo(WorkshopCrudController::class, 'Ateliers', 'fa fa-palette');
+        yield MenuItem::linkTo(WorkshopSessionCrudController::class, 'Dates', 'fa fa-calendar-days');
+        yield MenuItem::linkTo(RegistrationCrudController::class, 'Inscriptions', 'fa fa-users');
+
         yield MenuItem::section('Site');
         yield MenuItem::linkTo(PageCrudController::class, 'Pages', 'fa fa-file-lines');
         yield MenuItem::linkToRoute('Réglages', 'fa fa-sliders', 'admin_site_setting_settings_edit');

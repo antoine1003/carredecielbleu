@@ -1,0 +1,88 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% set status_colors = {open: 'info', confirmed: 'success', full: 'warning', cancelled: 'secondary'} %}
+
+{% block page_title %}Inscrits : {{ workshop.title }}{% endblock %}
+{% block content_title %}Inscrits : {{ workshop.title }}{% endblock %}
+
+{% block page_actions %}
+    <a class="btn btn-secondary" href="{{ path('admin_workshop_export', {id: workshop.id}) }}"><i class="fa fa-file-csv"></i> Exporter en CSV</a>
+    <a class="btn btn-secondary" href="{{ path('admin_workshop_session_new') }}"><i class="fa fa-plus"></i> Ajouter une date</a>
+    <a class="btn btn-secondary" href="{{ path('admin_workshop_edit', {entityId: workshop.id}) }}"><i class="fa fa-pen"></i> Modifier l'atelier</a>
+{% endblock %}
+
+{% block main %}
+    <p>Chaque ligne est une personne, chaque colonne une date proposée. Confirmez la date retenue : ses inscrits reçoivent un email de confirmation, les inscrits des autres dates un email d'information.</p>
+
+    {% if sessions is empty %}
+        <p class="mt-4">Aucune date n'est encore proposée pour cet atelier.</p>
+    {% else %}
+        <div class="table-responsive mt-4">
+            <table class="table datagrid">
+                <caption class="visually-hidden">Inscriptions par date pour l'atelier {{ workshop.title }}</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Personne</th>
+                        {% for session in sessions %}
+                            <th scope="col" class="text-center" style="min-width: 11rem;">
+                                <div>{{ session.startsAt|format_datetime('medium', 'short', locale: 'fr') }}</div>
+                                <twig:ea:Badge :color="status_colors[session.status.value]">{{ session.status.label }}</twig:ea:Badge>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in people %}
+                        <tr>
+                            <th scope="row">
+                                <a href="{{ path('admin_registration_edit', {entityId: person.registration.id}) }}">{{ person.registration.firstName }} {{ person.registration.lastName }}</a>
+                                <div class="small text-muted">{{ person.registration.email }}{% if person.registration.phone %} · {{ person.registration.phone }}{% endif %}</div>
+                            </th>
+                            {% for session in sessions %}
+                                <td class="text-center">
+                                    {% if person.sessions[session.id] ?? false %}
+                                        <i class="fa fa-check text-success" aria-hidden="true"></i><span class="visually-hidden">disponible</span>
+                                    {% else %}
+                                        <span aria-hidden="true">—</span><span class="visually-hidden">non</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="{{ sessions|length + 1 }}">Aucune inscription pour le moment.</td></tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Inscrits / places</th>
+                        {% for session in sessions %}
+                            <td class="text-center"><strong>{{ session.registrations|length }}</strong> / {{ session.effectiveCapacity }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th scope="row">Date retenue</th>
+                        {% for session in sessions %}
+                            <td class="text-center">
+                                {% if session.status.value == 'confirmed' %}
+                                    Confirmée le {{ session.confirmedAt ? session.confirmedAt|format_date('short', locale: 'fr') }}
+                                {% elseif session.status.value != 'cancelled' and session.startsAt > date() %}
+                                    <form method="post" action="{{ path('admin_workshop_session_confirm', {id: session.id}) }}"
+                                          onsubmit="return confirm('Confirmer le {{ session.startsAt|format_datetime('long', 'short', locale: 'fr')|e('js') }} ? Les emails partent immédiatement.');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('confirm_session' ~ session.id) }}">
+                                        <div class="form-check text-start d-inline-block mb-2">
+                                            <input class="form-check-input" type="checkbox" name="cancel_others" value="1" id="cancel-others-{{ session.id }}">
+                                            <label class="form-check-label small" for="cancel-others-{{ session.id }}">Annuler les autres dates</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm">Confirmer cette date</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

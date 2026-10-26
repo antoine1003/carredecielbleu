@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+{% import 'workshop/_macros.html.twig' as ui %}
+
+{% block title %}Annuler une inscription | {{ site_settings().siteName }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block body %}
+    <div class="container section">
+        <article class="page stack">
+            <h1 class="page-title">Annuler une inscription</h1>
+            {{ include('partials/_flashes.html.twig') }}
+
+            {% if registration %}
+                <p>Vous êtes inscrit·e à l'atelier <strong>« {{ registration.session.workshop.title }} »</strong> :</p>
+                <p class="notice">{{ ui.session_when(registration.session) }}{% if registration.session.effectiveLocation %}<br>{{ registration.session.effectiveLocation }}{% endif %}</p>
+                <form method="post" action="{{ path('app_workshop_cancel', {token: registration.cancelToken}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('workshop_cancel' ~ registration.cancelToken) }}">
+                    <button class="btn btn--primary" type="submit">Annuler mon inscription à cette date</button>
+                </form>
+                <p class="field__help">Vos inscriptions aux autres dates éventuelles ne sont pas modifiées.</p>
+            {% else %}
+                <p>Ce lien d'annulation n'est plus valide : l'inscription a peut-être déjà été annulée.</p>
+                <p><a class="btn btn--secondary" href="{{ path('app_workshops') }}">Voir les ateliers</a></p>
+            {% endif %}
+        </article>
+    </div>
+{% endblock %}

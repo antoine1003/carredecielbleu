@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+{% import 'workshop/_macros.html.twig' as ui %}
+
+{% set settings = site_settings() %}
+
+{% block title %}Atelier « {{ workshop.title }} » | {{ settings.siteName }}{% endblock %}
+{% block description %}{{ (workshop.summary ?: (workshop.description ? workshop.description|striptags : 'Atelier de vitrail avec ' ~ settings.siteName ~ ' à ' ~ settings.city ~ '.'))|u.truncate(160, '…', false) }}{% endblock %}
+
+{% block body %}
+    <div class="container section">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+            <ol>
+                <li><a href="{{ path('app_workshops') }}">Ateliers</a></li>
+                <li><span aria-current="page">{{ workshop.title }}</span></li>
+            </ol>
+        </nav>
+
+        <div class="workshop">
+            <div class="workshop__info stack">
+                <h1 class="product__title">{{ workshop.title }}</h1>
+                {% if workshop.duration or workshop.priceInfo or workshop.defaultLocation %}
+                    <dl class="specs">
+                        {% if workshop.duration %}<div><dt>Durée</dt><dd>{{ workshop.duration }}</dd></div>{% endif %}
+                        {% if workshop.priceInfo %}<div><dt>Tarif</dt><dd>{{ workshop.priceInfo }}</dd></div>{% endif %}
+                        {% if workshop.defaultLocation %}<div><dt>Lieu</dt><dd>{{ workshop.defaultLocation }}</dd></div>{% endif %}
+                    </dl>
+                {% endif %}
+                {% if workshop.description %}
+                    <div class="prose">{{ workshop.description|sanitize_html('app.rich_text') }}</div>
+                {% endif %}
+                <p class="product__note">Aucun paiement n'est demandé sur le site.</p>
+            </div>
+
+            <section class="workshop__register" aria-labelledby="inscription-titre" id="inscription">
+                <h2 id="inscription-titre">S'inscrire</h2>
+
+                {{ include('partials/_flashes.html.twig') }}
+
+                {% if result %}
+                    <div class="notice stack" role="status">
+                        {% if result.created > 0 or result.existing > 0 %}
+                            <p><strong>Merci, votre inscription est enregistrée.</strong></p>
+                            {% if result.emailSent %}
+                                <p>Un email récapitulatif vient de vous être envoyé, avec un lien pour annuler si besoin.</p>
+                            {% else %}
+                                <p>L'email récapitulatif n'a pas pu être envoyé. Votre inscription est bien enregistrée ; en cas de doute, <a href="{{ path('app_page', {slug: 'contact'}) }}">contactez-moi</a>.</p>
+                            {% endif %}
+                        {% endif %}
+                        {% if result.unavailable is not empty %}
+                            <p>{{ result.unavailable|length > 1 ? 'Certaines dates ne sont plus disponibles' : 'Une date n\'est plus disponible' }} :
+                                {% for date in result.unavailable %}{{ date|format_datetime('long', 'short', locale: 'fr') }}{{ not loop.last ? ', ' }}{% endfor %}.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% if workshop.sessions is empty %}
+                    <p>Aucune date n'est proposée pour le moment.</p>
+                {% else %}
+                    {{ form_start(form, {attr: {class: 'stack', novalidate: 'novalidate', action: path('app_workshop', {slug: workshop.slug}) ~ '#inscription'}}) }}
+                        {{ form_errors(form) }}
+                        <fieldset class="date-options">
+                            <legend class="date-options__legend">Dates qui vous conviennent</legend>
+                            {% for error in form.sessions.vars.errors %}<p class="field__error" id="sessions_error">{{ error.message }}</p>{% endfor %}
+                            {% set choices_by_value = {} %}
+                            {% for child in form.sessions %}{% set choices_by_value = choices_by_value|merge({('s' ~ child.vars.value): child}) %}{% endfor %}
+                            {% for session in workshop.sessions %}
+                                {% set child = choices_by_value['s' ~ session.id] ?? null %}
+                                {% set count = session_count(session) %}
+                                {% set names = session_public_names(session) %}
+                                <label class="date-option{{ child is null ? ' date-option--disabled' }}"{% if child %} for="{{ child.vars.id }}"{% endif %}>
+                                    {% if child %}
+                                        {{ form_widget(child, {attr: {class: 'date-option__input'}}) }}
+                                    {% else %}
+                                        <input class="date-option__input" type="checkbox" disabled>
+                                    {% endif %}
+                                    <span class="date-option__date">{{ ui.session_when(session) }}</span>
+                                    {% if session.effectiveLocation %}<span class="date-option__place">{{ session.effectiveLocation }}</span>{% endif %}
+                                    <span class="date-option__count">
+                                        {% if session.status.value == 'confirmed' %}<strong>Date confirmée</strong> · {% endif %}
+                                        {% if child is null %}
+                                            Complet
+                                        {% else %}
+                                            {{ count == 0 ? 'Aucune inscription' : count ~ ' personne' ~ (count > 1 ? 's') ~ ' inscrite' ~ (count > 1 ? 's') }}{% if names is not empty %} ({{ names|join(', ') }}){% endif %}
+                                            · {{ session_remaining(session) }} place{{ session_remaining(session) > 1 ? 's' }}
+                                        {% endif %}
+                                    </span>
+                                </label>
+                            {% endfor %}
+                            {% do form.sessions.setRendered() %}
+                        </fieldset>
+
+                        <div class="field-row">
+                            {{ ui.field(form.firstName) }}
+                            {{ ui.field(form.lastName) }}
+                        </div>
+                        {{ ui.field(form.email) }}
+                        {{ ui.field(form.phone) }}
+                        {{ ui.checkbox(form.showNamePublicly) }}
+                        {{ ui.checkbox(form.consent) }}
+                        <p class="field__help">Vos coordonnées servent uniquement à organiser l'atelier et sont supprimées après. <a href="{{ path('app_page', {slug: 'politique-de-confidentialite'}) }}">Politique de confidentialité</a>.</p>
+
+                        <div class="honeypot" aria-hidden="true">
+                            {{ form_label(form.website) }}
+                            {{ form_widget(form.website) }}
+                        </div>
+
+                        <div><button class="btn btn--primary" type="submit">Je m'inscris à ces dates</button></div>
+                    {{ form_end(form) }}
+                {% endif %}
+            </section>
+        </div>
+    </div>
+{% endblock %}

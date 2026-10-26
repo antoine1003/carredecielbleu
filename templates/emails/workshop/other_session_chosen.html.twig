@@ -1,0 +1,18 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block subject %}Atelier « {{ workshop.title }} » : la date est fixée{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 16px;">Bonjour {{ firstName }},</p>
+    <p style="margin:0 0 16px;">Merci d'avoir indiqué vos disponibilités pour l'atelier <strong>« {{ workshop.title }} »</strong>. La date retenue est :</p>
+    <p style="margin:0 0 16px; padding:16px; background:{{ mail.mist }}; border-radius:8px;">
+        {{ include('emails/workshop/_session.html.twig') }}
+    </p>
+    {% if otherDatesCancelled %}
+        <p style="margin:0 0 16px;">Les autres dates ne sont plus proposées. Si celle-ci vous convient finalement, vous pouvez encore <a href="{{ workshopUrl }}" style="color:{{ mail.link }};">vous y inscrire</a> tant qu'il reste des places.</p>
+    {% else %}
+        <p style="margin:0 0 16px;">Votre inscription aux autres dates reste enregistrée. Vous pouvez aussi <a href="{{ workshopUrl }}" style="color:{{ mail.link }};">vous inscrire à cette date</a> tant qu'il reste des places.</p>
+        <p style="margin:0 0 16px;">Vous ne souhaitez plus participer ? <a href="{{ cancelUrl }}" style="color:{{ mail.link }};">Annuler mon inscription</a>.</p>
+    {% endif %}
+    <p style="margin:0;">À bientôt,<br>{{ site_settings().siteName }}</p>
+{% endblock %}

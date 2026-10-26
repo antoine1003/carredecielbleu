@@ -1,0 +1,31 @@
+{# Champ de formulaire accessible, aux styles du design system (.field) #}
+{% macro field(child) %}
+    {% set error_id = child.vars.id ~ '_error' %}
+    {% set help_id = child.vars.id ~ '_help' %}
+    {% set invalid = not child.vars.valid %}
+    {% set described = [child.vars.help ? help_id : null, invalid ? error_id : null]|filter(v => v)|join(' ') %}
+    <div class="field{{ invalid ? ' field--invalid' }}">
+        {{ form_label(child, null, {label_attr: {class: 'field__label'}}) }}
+        {% if child.vars.help %}<p class="field__help" id="{{ help_id }}">{{ child.vars.help }}</p>{% endif %}
+        {{ form_widget(child, {attr: child.vars.attr|merge({class: 'field__input'}|merge(described ? {'aria-describedby': described} : {})|merge(invalid ? {'aria-invalid': 'true'} : {}))}) }}
+        {% for error in child.vars.errors %}<p class="field__error" id="{{ error_id }}">{{ error.message }}</p>{% endfor %}
+    </div>
+{% endmacro %}
+
+{# Case à cocher avec texte long #}
+{% macro checkbox(child) %}
+    {% set error_id = child.vars.id ~ '_error' %}
+    <div class="field{{ not child.vars.valid ? ' field--invalid' }}">
+        <label class="checkbox" for="{{ child.vars.id }}">
+            {{ form_widget(child, {attr: child.vars.attr|merge(not child.vars.valid ? {'aria-invalid': 'true', 'aria-describedby': error_id} : {})}) }}
+            <span>{{ child.vars.label }}</span>
+        </label>
+        {% for error in child.vars.errors %}<p class="field__error" id="{{ error_id }}">{{ error.message }}</p>{% endfor %}
+    </div>
+{% endmacro %}
+
+{# Description publique d'une date : jour, horaire, lieu #}
+{% macro session_when(session) %}
+    {{- session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize -}}
+    {%- if session.endsAt %} – {{ session.endsAt|format_datetime('none', 'short', locale: 'fr') }}{% endif -%}
+{% endmacro %}

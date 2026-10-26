@@ -1,0 +1,37 @@
+{#
+    Gabarit des emails. Les clients mail ne gèrent pas les variables CSS : les couleurs
+    sont recopiées ici depuis assets/styles/_tokens.css (encre, brume, estuaire).
+    À mettre à jour ici si la palette change.
+#}
+{% set mail = {ink: '#123049', mist: '#EAF1F3', link: '#2A6481', white: '#FFFFFF', muted: '#3F5466'} %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block subject %}{% endblock %}</title>
+</head>
+<body style="margin:0; padding:0; background:{{ mail.mist }};">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{{ mail.mist }};">
+        <tr>
+            <td align="center" style="padding:24px 12px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background:{{ mail.white }}; border-radius:12px;">
+                    <tr>
+                        <td style="padding:28px 28px 8px; font-family:Georgia, 'Times New Roman', serif; font-size:22px; color:{{ mail.ink }};">
+                            {{ site_settings().siteName }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px 28px 28px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:1.6; color:{{ mail.ink }};">
+                            {% block content %}{% endblock %}
+                        </td>
+                    </tr>
+                </table>
+                <p style="max-width:560px; margin:16px auto 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:1.5; color:{{ mail.muted }};">
+                    Vous recevez cet email parce que vous vous êtes inscrit·e à un atelier sur le site {{ site_settings().siteName }}.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

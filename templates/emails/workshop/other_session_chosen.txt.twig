@@ -1,0 +1,20 @@
+{% autoescape false %}
+Bonjour {{ firstName }},
+
+Merci d'avoir indiqué vos disponibilités pour l'atelier « {{ workshop.title }} ». La date retenue est :
+
+{{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}{% if session.effectiveLocation %}
+
+{{ session.effectiveLocation }}{% endif %}
+
+{% if otherDatesCancelled %}
+Les autres dates ne sont plus proposées. Si celle-ci vous convient finalement, vous pouvez encore vous y inscrire tant qu'il reste des places : {{ workshopUrl }}
+{% else %}
+Votre inscription aux autres dates reste enregistrée. Vous pouvez aussi vous inscrire à cette date tant qu'il reste des places : {{ workshopUrl }}
+
+Vous ne souhaitez plus participer ? {{ cancelUrl }}
+{% endif %}
+
+À bientôt,
+{{ site_settings().siteName }}
+{% endautoescape %}

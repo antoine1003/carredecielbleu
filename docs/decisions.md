@@ -47,3 +47,14 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Admin livré dès cette phase (connexion, produits, catégories, pages, réglages, écran d'import) car l'import doit être protégé ; les finitions restent en phase 4 (photos, tableau de bord, ateliers).
 - Écran d'import : upload → aperçu des changements champ par champ → validation. Fichier stocké hors `public/` (`var/imports/`), nom aléatoire, supprimé après usage ou au bout d'une heure.
 - Nouvelles dépendances légères : `twig/string-extra` (troncature des meta descriptions), `symfony/clock`, `symfony/ux-twig-component` déclaré explicitement.
+
+## 2026-10-26 — Ateliers et emails (phase 3)
+
+- Modèle : `Workshop` → `WorkshopSession` (dates, statut ouvert / confirmé / complet / annulé) → `Registration` (une ligne par personne et par date, unicité date + email, `submissionId` commun aux dates cochées ensemble).
+- Places : capacité par date, sinon celle de l'atelier ; une date sans place restante n'est plus proposée. Verrou SQL (`PESSIMISTIC_WRITE`) pendant l'inscription pour ne pas dépasser la capacité.
+- Affichage public : nombre d'inscrits et places restantes ; « Prénom I. » uniquement avec l'accord explicite (case dédiée, décochée par défaut).
+- Annulation : jeton de 64 caractères hexadécimaux (32 octets aléatoires) par inscription ; page de confirmation en GET sans effet, suppression en POST + CSRF.
+- Confirmation de la date retenue depuis le tableau dates × inscrits de l'admin ; emails de confirmation et d'information envoyés immédiatement (synchrone). Annulation des autres dates en option.
+- RGPD : minimum de données (prénom, nom, email, téléphone facultatif), consentement obligatoire, suppression par la personne (lien) ou par l'admin, purge automatique 90 jours après l'atelier (`app:registrations:purge`, à planifier en cron). Durée à reporter dans la politique de confidentialité.
+- Export CSV (atelier ou global) : UTF-8 avec BOM, séparateur point-virgule, cellules commençant par = + - @ neutralisées (injection de formules).
+- Pas de Mailpit sur le poste : emails vérifiés dans le profiler avec `MAILER_DSN=null://null` (`.env.dev.local`, non versionné).

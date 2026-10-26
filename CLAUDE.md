@@ -20,6 +20,7 @@ php bin/console doctrine:migrations:migrate
 php bin/console doctrine:fixtures:load # données de démo (jamais en prod)
 php bin/console app:catalog:import <fichier.csv> [--dry-run]   # import du CSV SumUp
 php bin/console app:admin:create <email>   # compte admin (mot de passe demandé masqué)
+php bin/console app:registrations:purge [--days=90] [--dry-run]   # RGPD : purge des inscriptions d'ateliers passés (cron quotidien)
 php bin/console asset-map:compile      # assets de prod
 composer qa                            # phpstan + php-cs-fixer (dry-run)
 vendor/bin/phpstan analyse
@@ -79,7 +80,12 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - L'admin voit un tableau dates × inscrits, confirme la date retenue → emails de confirmation (inscrits de cette date) et d'information (autres inscrits).
 - Annulation par lien tokenisé (token aléatoire non devinable).
 - Affichage public des inscrits : prénom + initiale du nom UNIQUEMENT si opt-in explicite, sinon seulement le nombre. Jamais d'email ni de téléphone en public.
-- Protection formulaires : CSRF, honeypot, rate limiting.
+- Protection formulaires : CSRF, honeypot (champ `website`), rate limiting (`workshop_registration` : 5 envois / 15 min / IP).
+- Disponibilité d'une date (`SessionAvailability`) : statut ouvert ou confirmé, date future, places restantes (capacité de la date, sinon celle de l'atelier). Le statut « complet » est un choix manuel de l'admin.
+- Confirmation (`SessionConfirmationService`) : une seule fois par date ; un inscrit de la date confirmée ne reçoit jamais aussi l'email d'information ; option « annuler les autres dates ».
+- Annulation : la page GET n'a aucun effet (pré-chargement des liens par les clients mail), l'annulation se fait en POST + CSRF et SUPPRIME l'inscription.
+- Conservation : inscriptions supprimées 90 jours après la date de l'atelier (`app:registrations:purge`, cron quotidien).
+- Emails : un échec d'envoi est journalisé (sans l'adresse) et signalé, sans annuler l'inscription ni la confirmation. Couleurs des emails écrites en dur dans `templates/emails/_layout.html.twig` (seule exception aux tokens : les clients mail ignorent les variables CSS).
 - Aucun paiement d'atelier géré par le site.
 
 ## Design — identité « Carré de ciel bleu »
@@ -139,7 +145,9 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Paiements 100 % sur SumUp, ni panier ni checkout sur le site.
 - `config.platform.php = 8.4.1` dans composer.json : les dépendances restent compatibles avec la prod PHP 8.4 même si le poste local est en PHP 8.5.
 - Doctrine : les lazy objects natifs sont toujours actifs avec DoctrineBundle 3.x (l'option `enable_native_lazy_objects` est dépréciée) ; rien à configurer.
-- Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). Mailpit en local (`MAILER_DSN` dans `.env.dev`).
+- Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). Mailpit en local (`MAILER_DSN` dans `.env.dev`) ; sans Mailpit, mettre `MAILER_DSN=null://null` dans `.env.dev.local` et lire les emails dans le profiler.
+- Fuseau : `Europe/Paris` fixé dans `Kernel::boot()` (dates d'ateliers stockées et affichées en heure de Paris).
+- Turbo Drive est actif : un formulaire soumis doit rediriger (303) en cas de succès, ou répondre 422 s'il est invalide.
 - Base locale : MariaDB 11.3 de WAMP (port 3307), configurée dans `.env.local`. Tables forcées en InnoDB + utf8mb4 (`default_table_options` dans doctrine.yaml).
 - PHPStan : `doctrine.allowNullablePropertyForRequiredField: true`, car les propriétés éditées par formulaire sont nullables (exigence Symfony Forms / EasyAdmin) alors que la colonne est NOT NULL.
 - Texte riche (descriptions, pages) : assaini avec le sanitizer `app.rich_text` à l'import ET à l'affichage (`|sanitize_html('app.rich_text')`).

@@ -32,7 +32,7 @@ php bin/console doctrine:fixtures:load   # données de démo, jamais en prod (ad
 symfony serve -d
 ```
 
-Le site est servi sur https://127.0.0.1:8000 ; l'administration sur /admin (connexion : /admin/connexion). En dev, les emails partent vers Mailpit (`smtp://127.0.0.1:1025`, interface sur http://localhost:8025).
+Le site est servi sur https://127.0.0.1:8000 ; l'administration sur /admin (connexion : /admin/connexion). En dev, les emails partent vers Mailpit (`smtp://127.0.0.1:1025`, interface sur http://localhost:8025). Sans Mailpit, mettez `MAILER_DSN=null://null` dans `.env.dev.local` : les emails sont alors visibles dans le profiler Symfony (onglet « Emails »).
 
 ## Commandes utiles
 
@@ -42,6 +42,7 @@ Le site est servi sur https://127.0.0.1:8000 ; l'administration sur /admin (conn
 | `composer cs-fix` | Corrige le style de code |
 | `php bin/console app:catalog:import <fichier.csv> [--dry-run]` | Import du catalogue depuis l'export SumUp (aussi disponible dans l'admin) |
 | `php bin/console app:admin:create <email>` | Crée un compte administrateur (mot de passe demandé de façon masquée) |
+| `php bin/console app:registrations:purge [--days=90]` | Supprime les inscriptions des ateliers passés (RGPD) |
 | `php bin/console asset-map:compile` | Compile les assets pour la prod |
 
 Fichier d'exemple de l'export SumUp : [`docs/samples/sumup-export.csv`](docs/samples/sumup-export.csv).
@@ -74,3 +75,8 @@ APP_ENV=prod php bin/console cache:clear
 ```
 
 4. Sauvegarde régulière de la base et du dossier `public/uploads/`.
+5. Tâche cron quotidienne pour la purge RGPD des inscriptions :
+
+```bash
+15 3 * * * cd /chemin/du/site && APP_ENV=prod php bin/console app:registrations:purge --no-interaction
+```

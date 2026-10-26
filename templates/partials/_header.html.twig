@@ -12,7 +12,7 @@
         <nav class="site-nav" aria-label="Navigation principale">
             <ul class="site-nav__list">
                 <li><a class="site-nav__link" href="{{ path('app_shop') }}"{% if route starts with 'app_shop' or route == 'app_product' %} aria-current="page"{% endif %}>Boutique</a></li>
-                {# Lien « Ateliers » ajouté en phase 3 #}
+                <li><a class="site-nav__link" href="{{ path('app_workshops') }}"{% if route starts with 'app_workshop' %} aria-current="page"{% endif %}>Ateliers</a></li>
                 <li><a class="site-nav__link" href="{{ path('app_page', {slug: 'l-atelier'}) }}"{% if route == 'app_page' and current_slug == 'l-atelier' %} aria-current="page"{% endif %}>L'atelier</a></li>
                 <li><a class="site-nav__link" href="{{ path('app_page', {slug: 'contact'}) }}"{% if route == 'app_page' and current_slug == 'contact' %} aria-current="page"{% endif %}>Contact</a></li>
             </ul>

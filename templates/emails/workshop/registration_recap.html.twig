@@ -1,0 +1,19 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block subject %}Votre inscription à l'atelier « {{ workshop.title }} »{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 16px;">Bonjour {{ firstName }},</p>
+    <p style="margin:0 0 16px;">Merci pour votre inscription à l'atelier <strong>« {{ workshop.title }} »</strong>. Vous avez indiqué être disponible {{ items|length > 1 ? 'à ces dates' : 'à cette date' }} :</p>
+    <ul style="margin:0 0 16px; padding-left:20px;">
+        {% for item in items %}
+            <li style="margin-bottom:12px;">
+                {{ include('emails/workshop/_session.html.twig', {session: item.session}) }}<br>
+                <a href="{{ item.cancelUrl }}" style="color:{{ mail.link }};">Je ne suis plus disponible à cette date</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <p style="margin:0 0 16px;">Dès que la date de l'atelier sera fixée, vous recevrez un email de confirmation.</p>
+    {% if workshop.priceInfo %}<p style="margin:0 0 16px;">Tarif : {{ workshop.priceInfo }}. Aucun paiement n'est demandé sur le site.</p>{% endif %}
+    <p style="margin:0;">À bientôt,<br>{{ site_settings().siteName }}</p>
+{% endblock %}

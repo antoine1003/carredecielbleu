@@ -1,0 +1,18 @@
+{% autoescape false %}
+Bonjour {{ firstName }},
+
+Merci pour votre inscription à l'atelier « {{ workshop.title }} ». Vous avez indiqué être disponible {{ items|length > 1 ? 'à ces dates' : 'à cette date' }} :
+
+{% for item in items %}
+- {{ item.session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}{% if item.session.effectiveLocation %}, {{ item.session.effectiveLocation }}{% endif %}
+
+  Je ne suis plus disponible à cette date : {{ item.cancelUrl }}
+{% endfor %}
+
+Dès que la date de l'atelier sera fixée, vous recevrez un email de confirmation.
+{% if workshop.priceInfo %}Tarif : {{ workshop.priceInfo }}. Aucun paiement n'est demandé sur le site.
+{% endif %}
+
+À bientôt,
+{{ site_settings().siteName }}
+{% endautoescape %}

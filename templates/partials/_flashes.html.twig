@@ -1,0 +1,5 @@
+{% for type, messages in app.flashes(['error', 'success']) %}
+    {% for message in messages %}
+        <p class="notice{{ type == 'error' ? ' notice--error' }}" role="{{ type == 'error' ? 'alert' : 'status' }}">{{ message }}</p>
+    {% endfor %}
+{% endfor %}

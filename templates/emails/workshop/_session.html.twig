@@ -1,0 +1,2 @@
+{# Description d'une date d'atelier dans un email (variable : session) #}
+<strong>{{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}</strong>{% if session.endsAt %} – {{ session.endsAt|format_datetime('none', 'short', locale: 'fr') }}{% endif %}{% if session.effectiveLocation %}<br>{{ session.effectiveLocation }}{% endif %}

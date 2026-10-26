@@ -63,20 +63,23 @@ final class SiteSettingCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield FormField::addFieldset('Page d\'accueil');
+        yield FormField::addColumn('col-12 col-xl-7');
+        yield FormField::addFieldset('Page d\'accueil', 'fa fa-house');
         yield TextField::new('siteName', 'Nom du site');
         yield TextField::new('homeTitle', 'Grand titre');
-        yield TextareaField::new('homeIntro', 'Texte de présentation');
+        yield TextareaField::new('homeIntro', 'Texte de présentation')->setNumOfRows(3);
         yield TextareaField::new('homeMetaDescription', 'Description pour les moteurs de recherche')
-            ->setHelp('150 caractères environ.');
+            ->setNumOfRows(3)
+            ->setHelp('150 caractères environ, affichée sous le titre dans Google.');
 
-        yield FormField::addFieldset('Coordonnées');
+        yield FormField::addColumn('col-12 col-xl-5');
+        yield FormField::addFieldset('Coordonnées publiques', 'fa fa-address-card');
         yield TextField::new('city', 'Ville');
-        yield EmailField::new('contactEmail', 'Email de contact public')->setRequired(false);
-        yield UrlField::new('instagramUrl', 'Instagram')->setRequired(false);
-        yield UrlField::new('facebookUrl', 'Facebook')->setRequired(false);
+        yield EmailField::new('contactEmail', 'Email de contact')->setRequired(false);
+        yield UrlField::new('instagramUrl', 'Instagram')->setRequired(false)->setColumns('col-12 col-md-6');
+        yield UrlField::new('facebookUrl', 'Facebook')->setRequired(false)->setColumns('col-12 col-md-6');
 
-        yield FormField::addFieldset('Boutique');
+        yield FormField::addFieldset('Boutique', 'fa fa-store');
         yield ChoiceField::new('soldOutBehavior', 'Produits épuisés (stock suivi à zéro)')
             ->setHelp('Chaque produit peut avoir son propre réglage.');
     }

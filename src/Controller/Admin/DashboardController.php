@@ -23,6 +23,8 @@ final class DashboardController extends AbstractDashboardController
     {
         return Dashboard::new()
             ->setTitle('Carré de ciel bleu')
+            // Contenu sur toute la largeur de l'écran (par défaut, EasyAdmin limite sa largeur).
+            ->renderContentMaximized()
             ->setLocales(['fr']);
     }
 

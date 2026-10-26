@@ -1,0 +1,114 @@
+/*
+ * Design tokens — Carré de ciel bleu (direction « Lumière d'estuaire »).
+ *
+ * Seul endroit où les couleurs et les polices sont définies.
+ *
+ * 1. PALETTE : les couleurs brutes. Pour changer une teinte, modifier sa valeur ici :
+ *    tout le site suit (les composants n'utilisent que les rôles du point 2).
+ * 2. RÔLES : à quoi sert chaque couleur (texte, fond, bouton…). Pour attribuer une autre
+ *    couleur de la palette à un rôle, changer la référence var(--palette-…).
+ * 3. POLICES : familles utilisées, voir le mode d'emploi dans _fonts.css.
+ *
+ * Après un changement de couleur, vérifier les contrastes sur /_styleguide (en dev) :
+ * texte ≥ 4,5:1, bordures de champs et grands titres ≥ 3:1 (WCAG AA).
+ */
+
+:root {
+    /* ---------- 1. Palette ---------- */
+    --palette-encre: #123049;        /* bleu des eaux profondes */
+    --palette-estuaire: #2A6481;     /* bleu-vert du fleuve */
+    --palette-ciel: #9FC8DD;         /* verre clair, illustrations */
+    --palette-brume: #EAF1F3;        /* fond général */
+    --palette-blanc: #FFFFFF;
+    --palette-gris-bleu: #3F5466;    /* texte secondaire */
+    --palette-galet: #6B8597;        /* bordures de champs */
+    --palette-trait: #9DB1BF;        /* séparateurs décoratifs */
+    --palette-salicorne: #6E9A4F;    /* vert végétal, décor uniquement */
+    --palette-salicorne-fonce: #476F30; /* vert lisible pour du texte */
+    --palette-ambre: #F0B54A;        /* lumière dorée */
+    --palette-aurore: #E58FA6;       /* rose de vitrail */
+    --palette-grenat: #A3263F;       /* erreurs de formulaire */
+
+    /* ---------- 2. Rôles ---------- */
+    --color-bg: var(--palette-brume);
+    --color-surface: var(--palette-blanc);
+    --color-text: var(--palette-encre);
+    --color-text-muted: var(--palette-gris-bleu);
+    --color-heading: var(--palette-encre);
+
+    --color-link: var(--palette-estuaire);
+    --color-link-hover: var(--palette-encre);
+    --color-focus: var(--palette-encre);
+
+    --color-action-bg: var(--palette-encre);
+    --color-action-text: var(--palette-blanc);
+    --color-action-bg-hover: var(--palette-estuaire);
+
+    --color-border: var(--palette-trait);
+    --color-field-border: var(--palette-galet);
+    --color-lead: var(--palette-encre);         /* « plombs » des illustrations */
+
+    --color-status-available: var(--palette-salicorne-fonce);
+    --color-status-made-to-order: var(--palette-estuaire);
+    --color-status-sold-out: var(--palette-gris-bleu);
+    --color-error: var(--palette-grenat);
+
+    /* Éclats de lumière (formes translucides en décor) */
+    --color-shard-1: var(--palette-ambre);
+    --color-shard-2: var(--palette-aurore);
+    --color-shard-3: var(--palette-salicorne);
+    --shard-opacity: 0.32;
+
+    /* Fonds d'illustrations provisoires (avant photos) */
+    --color-glass-1: var(--palette-ciel);
+    --color-glass-2: var(--palette-estuaire);
+    --color-glass-3: var(--palette-ambre);
+    --color-glass-4: var(--palette-aurore);
+
+    /* ---------- 3. Polices ---------- */
+    --font-display: 'Gloock', 'Georgia', 'Times New Roman', serif;
+    --font-body: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-weight-body: 400;
+    --font-weight-strong: 700;
+    --font-weight-display: 400;
+
+    /* Échelle typographique (corps 18 px, rapport ≈ 1,25, fluide entre 375 et 1280 px) */
+    --step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+    --step-0: clamp(1.0625rem, 1.03rem + 0.15vw, 1.125rem);
+    --step-1: clamp(1.25rem, 1.18rem + 0.3vw, 1.4rem);
+    --step-2: clamp(1.5rem, 1.35rem + 0.65vw, 1.875rem);
+    --step-3: clamp(1.875rem, 1.6rem + 1.2vw, 2.75rem);
+    --step-4: clamp(2.5rem, 1.95rem + 2.4vw, 4rem);
+    --step-5: clamp(2.75rem, 1.9rem + 3.9vw, 5.75rem);
+    --leading-body: 1.6;
+    --leading-tight: 1.05;
+    --measure: 66ch;
+
+    /* ---------- Espacements, formes, mise en page ---------- */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
+    --space-8: 4.5rem;
+    --space-9: 6rem;
+
+    --radius-sm: 6px;
+    --radius-md: 14px;
+    --radius-arch: 999px 999px var(--radius-sm) var(--radius-sm); /* fenêtre en ogive */
+
+    --container: 74rem;
+    --gutter: 1rem;
+    --tap-min: 44px;
+
+    --duration-fast: 150ms;
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (min-width: 48rem) {
+    :root {
+        --gutter: 1.5rem;
+    }
+}

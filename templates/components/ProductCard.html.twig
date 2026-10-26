@@ -1,0 +1,51 @@
+{#
+    Carte produit de la boutique.
+    - price : prix en euros (float) ; fromPrice = true affiche « à partir de » (produits à variantes)
+    - status : available | made_to_order | sold_out
+    - purchaseUrl : lien SumUp ; sans lien, le bouton devient « Me contacter » (contactUrl)
+    - image : {src, srcset?, sizes?, width, height, alt} ou null (illustration provisoire)
+#}
+{% props
+    name,
+    url = '#',
+    price = null,
+    fromPrice = false,
+    status = 'available',
+    purchaseUrl = null,
+    contactUrl = '#',
+    image = null,
+    motif = 'defaut',
+    headingLevel = 3,
+    lazy = true
+%}
+<article {{ attributes.defaults({class: 'product-card'}) }}>
+    <div class="product-card__media lancet">
+        {% if image %}
+            <img src="{{ image.src }}"
+                 {% if image.srcset is defined %}srcset="{{ image.srcset }}" sizes="{{ image.sizes ?? '(min-width: 74rem) 18rem, (min-width: 48rem) 33vw, 100vw' }}"{% endif %}
+                 width="{{ image.width }}" height="{{ image.height }}"
+                 alt="{{ image.alt }}"
+                 {% if lazy %}loading="lazy"{% endif %} decoding="async">
+        {% else %}
+            <twig:GlassArt motif="{{ motif }}" />
+        {% endif %}
+    </div>
+    <h{{ headingLevel }} class="product-card__title"><a href="{{ url }}">{{ name }}</a></h{{ headingLevel }}>
+    <p class="product-card__meta">
+        {% if price is not null %}
+            <span class="product-card__price">{% if fromPrice %}à partir de {% endif %}{{ price|format_currency('EUR', locale: 'fr') }}</span>
+        {% endif %}
+        <twig:Status value="{{ status }}" />
+    </p>
+    <div class="product-card__actions">
+        {% if purchaseUrl and status != 'sold_out' %}
+            <a class="btn btn--text" href="{{ purchaseUrl }}" target="_blank" rel="noopener noreferrer">
+                Acheter sur SumUp
+                <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2 7 9"/></svg>
+                <span class="visually-hidden">(nouvel onglet)</span>
+            </a>
+        {% else %}
+            <a class="btn btn--text" href="{{ contactUrl }}">Me contacter</a>
+        {% endif %}
+    </div>
+</article>

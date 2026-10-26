@@ -84,8 +84,11 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 ## Design — identité « Carré de ciel bleu »
 
 - Ambiance : lumière à travers le verre, nature, couleurs de vitrail. Doit se démarquer d'un template générique.
-- Palette en variables CSS (`assets/styles/_tokens.css`) : bleus profonds, ambre, vert végétal, rose/rouge de vitrail. Ne jamais coder une couleur en dur hors des tokens.
-- Deux familles de polices maximum : une display expressive + une lisible pour le texte. Servies en local (pas de CDN de fonts).
+- Direction retenue : « Lumière d'estuaire » (fond brume, encre bleue, éclats de verre translucides, visuels en fenêtres en ogive). Les couleurs ne sont PAS définitives : l'artisane va les retoucher.
+- `assets/styles/_tokens.css` en deux niveaux : `--palette-*` (valeurs brutes, le seul endroit à modifier pour changer une teinte) puis rôles `--color-*` (texte, fond, action, statuts…). Les composants n'utilisent QUE les rôles (ou `--palette-*` dans `color-mix()` pour des nuances). Ne jamais coder une couleur en dur ailleurs.
+- Polices via `--font-display` (Gloock) et `--font-body` (Nunito Sans) ; fichiers woff2 dans `assets/fonts/`, `@font-face` et mode d'emploi pour en changer dans `assets/styles/_fonts.css`. Deux familles maximum, servies en local (pas de CDN de fonts).
+- `/_styleguide` (dev uniquement) montre palette, contrastes calculés en direct, typographie et composants : le relire après tout changement de couleur ou de police.
+- Composants Twig anonymes dans `templates/components/` (`<twig:ProductCard>`, `<twig:Status>`, `<twig:GlassArt>`, `<twig:Shards>`).
 - Éléments récurrents : formes organiques, motifs de plombs/cloisons, transparences. Animations sobres, respecter `prefers-reduced-motion`.
 - Mobile-first. Tester systématiquement 375 px, 768 px, 1280 px.
 - Accessibilité WCAG AA : contrastes, focus visibles, navigation clavier, `alt` pertinents, un seul `h1` par page.

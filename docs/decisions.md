@@ -27,3 +27,12 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Symfony 8.1.9, Doctrine ORM 3.7 / DoctrineBundle 3.3, EasyAdmin 5.8, PHPStan 2 (niveau 8), php-cs-fixer 3 (`@Symfony` + `@Symfony:risky` + `declare_strict_types`).
 - EasyAdmin 5 : routes chargées par `config/routes/easyadmin.yaml` (`type: easyadmin.routes`, fourni par la recette) ; le dashboard se déclarera avec `#[AdminDashboard(routePath: '/admin', routeName: 'admin')]`.
 - Lazy objects natifs : toujours actifs avec DoctrineBundle 3.x.
+
+## 2026-10-26 — Direction artistique (phase 1)
+
+- Trois directions proposées (A « Plomb & lumière », B « Lumière d'estuaire », C « Nef nocturne »). **B retenue** par l'artisane, avec des couleurs encore à ajuster ensemble.
+- Couleurs et polices entièrement pilotées par variables CSS (`_tokens.css` : palette → rôles ; `--font-display` / `--font-body`) pour permettre ces retouches sans toucher aux composants.
+- Polices : Gloock (titres) et Nunito Sans variable (texte), sous-ensemble latin en woff2, licence OFL (`assets/fonts/OFL-*.txt`), préchargées dans `base.html.twig`.
+- Contrastes AA vérifiés : le vert « salicorne » (#6E9A4F) ne sert qu'au décor ; une variante foncée (#476F30) sert au texte « En stock ».
+- Visuels provisoires en verre (`<twig:GlassArt>`) tant que les photos ne sont pas uploadées.
+- Pas de menu burger : 4 liens de navigation qui passent à la ligne, aucun JS nécessaire.

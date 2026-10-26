@@ -1,0 +1,26 @@
+/*
+ * Polices servies en local (licence SIL OFL, voir assets/fonts/OFL-*.txt).
+ *
+ * Changer de police :
+ * 1. déposer le fichier .woff2 (sous-ensemble « latin ») dans assets/fonts/ ;
+ * 2. ajouter un bloc @font-face ci-dessous avec le nom de la famille ;
+ * 3. changer --font-display ou --font-body dans _tokens.css ;
+ * 4. mettre à jour le préchargement dans templates/base.html.twig.
+ * Deux familles maximum sur le site (une pour les titres, une pour le texte).
+ */
+
+@font-face {
+    font-family: 'Gloock';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/gloock-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Nunito Sans';
+    font-style: normal;
+    font-weight: 200 1000;
+    font-display: swap;
+    src: url('../fonts/nunito-sans-latin-wght-normal.woff2') format('woff2-variations');
+}

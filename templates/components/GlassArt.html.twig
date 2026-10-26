@@ -1,0 +1,30 @@
+{#
+    Illustration provisoire en verre, affichée tant qu'un produit n'a pas de photo.
+    Usage : <twig:GlassArt motif="insecte" />  (motifs : insecte, fleurs, lune, defaut)
+#}
+{% props motif = 'defaut', label = 'Illustration provisoire, photo à venir' %}
+<svg {{ attributes.defaults({class: 'glass-art glass-art--' ~ motif, viewBox: '0 0 200 266', role: 'img', 'aria-label': label, preserveAspectRatio: 'xMidYMid slice'}) }}>
+    <g class="glass-art__lead">
+    {% if motif == 'insecte' %}
+        <path class="glass-art__sky" d="M100 96 C70 68 30 78 34 108 C38 134 80 130 100 118 Z"/>
+        <path class="glass-art__sky" d="M100 96 C130 68 170 78 166 108 C162 134 120 130 100 118 Z"/>
+        <ellipse class="glass-art__a" cx="100" cy="150" rx="28" ry="46"/>
+        <path class="glass-art__none" d="M74 142 H126 M74 162 H126"/>
+        <circle class="glass-art__dark" cx="100" cy="100" r="16"/>
+    {% elseif motif == 'fleurs' %}
+        <path class="glass-art__none" d="M70 266 V150 M100 266 V130 M130 266 V154"/>
+        <path class="glass-art__c" d="M54 154 C50 120 62 106 70 116 C78 106 90 120 86 154 Z"/>
+        <path class="glass-art__b" d="M84 134 C80 96 92 82 100 92 C108 82 120 96 116 134 Z"/>
+        <path class="glass-art__a" d="M114 158 C110 124 122 110 130 120 C138 110 150 124 146 158 Z"/>
+    {% elseif motif == 'lune' %}
+        <circle class="glass-art__light" cx="126" cy="96" r="30"/>
+        <path class="glass-art__a" d="M0 170 C30 150 50 150 70 168 C90 186 112 182 130 164 C150 146 176 148 200 166 V266 H0 Z"/>
+        <path class="glass-art__sky" d="M0 206 C34 188 58 192 80 206 C104 222 130 218 150 202 C168 188 186 190 200 198 V266 H0 Z"/>
+    {% else %}
+        <path class="glass-art__a" d="M0 0 H200 V96 C150 70 110 120 60 92 C30 76 10 84 0 90 Z"/>
+        <circle class="glass-art__b" cx="140" cy="58" r="26"/>
+        <path class="glass-art__c" d="M0 150 C50 124 100 176 150 146 C170 134 190 136 200 140 V200 H0 Z"/>
+        <path class="glass-art__dark" d="M0 200 H200 V266 H0 Z"/>
+    {% endif %}
+    </g>
+</svg>

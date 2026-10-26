@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Styleguide, Carré de ciel bleu{% endblock %}
+
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block stylesheets %}
+    {# Styles propres à cette page de dev : uniquement des tokens #}
+    <style>
+        .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr)); gap: var(--space-5); margin: 0; padding: 0; list-style: none; }
+        .sg-swatch__chip { height: 6rem; border-radius: var(--radius-arch); border: 1px solid var(--color-border); }
+        .sg-swatch code, .sg-contrast code { font-size: var(--step--1); }
+        .sg-contrast { width: 100%; border-collapse: collapse; }
+        .sg-contrast-wrap { overflow-x: auto; }
+        .sg-contrast th, .sg-contrast td { padding: var(--space-3); text-align: left; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+        .sg-contrast__sample { display: inline-block; padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-weight: var(--font-weight-strong); }
+        .sg-contrast tr[data-pass='false'] [data-ratio] { color: var(--color-error); font-weight: var(--font-weight-strong); }
+        .sg-type > * + * { margin-top: var(--space-4); }
+        .sg-form { max-width: 40rem; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <section class="hero" aria-labelledby="sg-hero">
+            <twig:Shards />
+            <div class="hero__text stack">
+                <h1 id="sg-hero" class="hero__title">Vous sentez le parfum de la couleur ?</h1>
+                <p class="hero__lead">Vitraux faits main. [Phrase de présentation de l'artisane]</p>
+                <div class="cluster">
+                    <a class="btn btn--primary" href="#">Voir la boutique</a>
+                    <a class="btn btn--text" href="#">Les ateliers de vitrail</a>
+                </div>
+            </div>
+            <div class="hero__art lancet">
+                <twig:GlassArt motif="lune" label="Illustration : lune sur les vagues" />
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="sg-palette">
+            <div class="section__head">
+                <div>
+                    <h2 id="sg-palette">Palette</h2>
+                    <p class="section__intro">Valeurs définies dans <code>assets/styles/_tokens.css</code>, section « Palette ».</p>
+                </div>
+            </div>
+            <ul class="sg-swatches">
+                {% for name in palette %}
+                    <li class="sg-swatch stack" style="--stack-gap: var(--space-2)">
+                        <div class="sg-swatch__chip" style="background: var(--palette-{{ name }})"></div>
+                        <strong>{{ name|replace({'-': ' '})|capitalize }}</strong>
+                        <code>--palette-{{ name }}</code>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="section" aria-labelledby="sg-contrast" data-controller="contrast">
+            <div class="section__head">
+                <div>
+                    <h2 id="sg-contrast">Contrastes</h2>
+                    <p class="section__intro">Calculés en direct depuis les variables CSS : à relire après chaque changement de couleur.</p>
+                </div>
+            </div>
+            <div class="sg-contrast-wrap">
+                <table class="sg-contrast">
+                    <thead>
+                        <tr><th scope="col">Usage</th><th scope="col">Aperçu</th><th scope="col">Variables</th><th scope="col">Résultat (minimum)</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for pair in contrastPairs %}
+                            <tr data-contrast-target="row" data-fg="{{ pair[0] }}" data-bg="{{ pair[1] }}" data-min="{{ pair[2] }}">
+                                <td>{{ pair[3] }}</td>
+                                <td><span class="sg-contrast__sample" style="color: var(--{{ pair[0] }}); background: var(--{{ pair[1] }})">Abeille charpentière</span></td>
+                                <td><code>--{{ pair[0] }}</code><br><code>--{{ pair[1] }}</code></td>
+                                <td><span data-ratio>…</span> ({{ pair[2]|number_format(1, ',') }}:1)</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section sg-type" aria-labelledby="sg-type">
+            <h2 id="sg-type">Typographie</h2>
+            <p class="section__intro">Titres : <code>--font-display</code>. Texte : <code>--font-body</code>. Mode d'emploi pour changer de police dans <code>assets/styles/_fonts.css</code>.</p>
+            <p style="font-family: var(--font-display); font-size: var(--step-5); line-height: var(--leading-tight)">Lumière d'estuaire</p>
+            <h2>Titre de section</h2>
+            <h3>Titre de carte</h3>
+            <p>Ce vitrail capture la rencontre du bleu et du vert comme une respiration. Le bleu, profond et apaisant, évoque la fraîcheur des eaux qui glissent et se retirent. <strong>Création fragile, fait main, qui nécessite une manipulation délicate.</strong> <a href="#">Un lien dans le texte</a>.</p>
+            <p style="font-size: var(--step--1); color: var(--color-text-muted)">Petit texte : mentions, aides de formulaire.</p>
+        </section>
+
+        <section class="section" aria-labelledby="sg-buttons">
+            <h2 id="sg-buttons" style="margin-bottom: var(--space-5)">Boutons</h2>
+            <div class="cluster" style="--cluster-gap: var(--space-5)">
+                <a class="btn btn--primary" href="#">Voir la boutique</a>
+                <a class="btn btn--secondary" href="#">Les ateliers</a>
+                <button class="btn btn--primary" type="button">Je m'inscris à ces dates</button>
+                <a class="btn btn--text" href="#">Toute la boutique</a>
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="sg-cards">
+            <div class="section__head">
+                <h2 id="sg-cards">Cartes produit</h2>
+            </div>
+            <div class="grid-cards">
+                <twig:ProductCard name="Abeille charpentière bleue" price="{{ 30.0 }}" status="available" purchaseUrl="https://example.invalid/sumup" motif="insecte" />
+                <twig:ProductCard name="Bouquet éternel de tulipes" price="{{ 45.0 }}" status="available" purchaseUrl="https://example.invalid/sumup" motif="fleurs" />
+                <twig:ProductCard name="Vitrail « Lune et vagues »" price="{{ 150.0 }}" status="made_to_order" motif="lune" />
+                <twig:ProductCard name="Épis de blé vitrail (unité)" price="{{ 20.0 }}" fromPrice="{{ true }}" status="sold_out" />
+            </div>
+        </section>
+
+        <section class="section" aria-labelledby="sg-form">
+            <h2 id="sg-form" style="margin-bottom: var(--space-5)">Formulaire d'atelier</h2>
+            <form class="sg-form stack" style="--stack-gap: var(--space-5)" action="#" onsubmit="return false">
+                <fieldset class="date-options">
+                    <legend class="date-options__legend">Dates qui vous conviennent</legend>
+                    <label class="date-option">
+                        <input class="date-option__input" type="checkbox" name="dates[]" value="1" checked>
+                        <span class="date-option__date">[Date 1]</span>
+                        <span class="date-option__place">[Lieu]</span>
+                        <span class="date-option__count">4 personnes inscrites</span>
+                    </label>
+                    <label class="date-option">
+                        <input class="date-option__input" type="checkbox" name="dates[]" value="2">
+                        <span class="date-option__date">[Date 2]</span>
+                        <span class="date-option__place">[Lieu]</span>
+                        <span class="date-option__count">[Prénom I.] et [Prénom I.]</span>
+                    </label>
+                    <label class="date-option date-option--disabled">
+                        <input class="date-option__input" type="checkbox" name="dates[]" value="3" disabled>
+                        <span class="date-option__date">[Date 3]</span>
+                        <span class="date-option__place">[Lieu]</span>
+                        <span class="date-option__count">Complet</span>
+                    </label>
+                </fieldset>
+                <div class="field">
+                    <label class="field__label" for="sg-firstname">Prénom</label>
+                    <input class="field__input" id="sg-firstname" name="firstname" autocomplete="given-name">
+                </div>
+                <div class="field field--invalid">
+                    <label class="field__label" for="sg-email">Email</label>
+                    <input class="field__input" id="sg-email" name="email" type="email" autocomplete="email" aria-invalid="true" aria-describedby="sg-email-error" value="camille@">
+                    <p class="field__error" id="sg-email-error">Indiquez une adresse email complète, par exemple prenom@exemple.fr.</p>
+                </div>
+                <label class="checkbox">
+                    <input type="checkbox" name="optin">
+                    <span>J'accepte que mon prénom et l'initiale de mon nom apparaissent dans la liste des inscrits.</span>
+                </label>
+                <p class="notice">Vous recevrez un email dès que la date de l'atelier sera confirmée.</p>
+                <div><button class="btn btn--primary" type="submit">Je m'inscris à ces dates</button></div>
+            </form>
+        </section>
+    </div>
+{% endblock %}

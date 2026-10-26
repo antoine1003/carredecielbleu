@@ -1,0 +1,5 @@
+{# Disponibilité d'un produit : available | made_to_order | sold_out #}
+{% props value = 'available' %}
+{% set labels = {available: 'En stock', made_to_order: 'Sur commande', sold_out: 'Épuisé'} %}
+{% set modifiers = {available: 'available', made_to_order: 'made-to-order', sold_out: 'sold-out'} %}
+<span {{ attributes.defaults({class: 'status status--' ~ (modifiers[value] ?? 'available')}) }}>{{ labels[value] ?? labels.available }}</span>

@@ -80,7 +80,7 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - L'admin voit un tableau dates × inscrits, confirme la date retenue → emails de confirmation (inscrits de cette date) et d'information (autres inscrits).
 - Annulation par lien tokenisé (token aléatoire non devinable).
 - Affichage public des inscrits : prénom + initiale du nom UNIQUEMENT si opt-in explicite, sinon seulement le nombre. Jamais d'email ni de téléphone en public.
-- Protection formulaires : CSRF, honeypot (champ `website`), rate limiting (`workshop_registration` : 5 envois / 15 min / IP).
+- Protection formulaires : CSRF, honeypot (champ `website`), rate limiting (`workshop_registration` : 5 inscriptions valides / 15 min / IP ; les soumissions en erreur ne comptent pas). En test local, vider le compteur avec `php bin/console cache:pool:clear cache.rate_limiter`.
 - Disponibilité d'une date (`SessionAvailability`) : statut ouvert ou confirmé, date future, places restantes (capacité de la date, sinon celle de l'atelier). Le statut « complet » est un choix manuel de l'admin.
 - Confirmation (`SessionConfirmationService`) : une seule fois par date ; un inscrit de la date confirmée ne reçoit jamais aussi l'email d'information ; option « annuler les autres dates ».
 - Annulation : la page GET n'a aucun effet (pré-chargement des liens par les clients mail), l'annulation se fait en POST + CSRF et SUPPRIME l'inscription.

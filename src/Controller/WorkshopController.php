@@ -63,13 +63,14 @@ final class WorkshopController extends AbstractController
                 return $this->redirectToRoute('app_workshop', ['slug' => $slug, 'inscription' => 'ok'], Response::HTTP_SEE_OTHER);
             }
 
-            if (!$limiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
-                $this->addFlash('error', 'Trop de tentatives en peu de temps. Merci de réessayer dans quelques minutes.');
-
-                return $this->redirectToRoute('app_workshop', ['slug' => $slug], Response::HTTP_SEE_OTHER);
-            }
-
             if ($form->isValid()) {
+                // Seules les inscriptions valides comptent : des erreurs de saisie ne bloquent personne.
+                if (!$limiter->create($request->getClientIp() ?? 'unknown')->consume()->isAccepted()) {
+                    $this->addFlash('error', 'Trop d\'inscriptions envoyées en peu de temps depuis cette connexion. Merci de réessayer dans quelques minutes.');
+
+                    return $this->redirectToRoute('app_workshop', ['slug' => $slug], Response::HTTP_SEE_OTHER);
+                }
+
                 $result = $registrations->register($workshop, $data);
                 $request->getSession()->set('workshop_registration_result', [
                     'created' => \count($result->created),

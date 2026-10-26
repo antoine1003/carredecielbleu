@@ -11,7 +11,7 @@ Site vitrine d'une artisane vitrailliste : boutique (catalogue importé depuis S
 
 ## Installation locale
 
-Prérequis : PHP 8.4+ avec les extensions intl, mbstring, pdo_mysql, gd, zip, xml, curl ; Composer ; [Symfony CLI](https://symfony.com/download) ; MariaDB ou MySQL ; [Mailpit](https://mailpit.axllent.org) (facultatif, pour voir les emails).
+Prérequis : PHP 8.4+ avec les extensions intl, mbstring, pdo_mysql, gd, zip, xml, curl ; Composer ; [Symfony CLI](https://symfony.com/download) ; MariaDB ou MySQL ; [MailDev](https://github.com/maildev/maildev) (facultatif, pour voir les emails).
 
 ```bash
 composer install
@@ -32,7 +32,7 @@ php bin/console doctrine:fixtures:load   # données de démo, jamais en prod (ad
 symfony serve -d
 ```
 
-Le site est servi sur https://127.0.0.1:8000 ; l'administration sur /admin (connexion : /admin/connexion). En dev, les emails partent vers Mailpit (`smtp://127.0.0.1:1025`, interface sur http://localhost:8025). Sans Mailpit, mettez `MAILER_DSN=null://null` dans `.env.dev.local` : les emails sont alors visibles dans le profiler Symfony (onglet « Emails »).
+Le site est servi sur https://127.0.0.1:8000 ; l'administration sur /admin (connexion : /admin/connexion). En dev, les emails partent vers MailDev (`smtp://localhost:1025`, emails lisibles sur http://localhost:1080). Sans MailDev, mettez `MAILER_DSN=null://null` dans `.env.dev.local` : les emails sont alors visibles dans le profiler Symfony (onglet « Emails »).
 
 ## Commandes utiles
 

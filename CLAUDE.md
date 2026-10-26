@@ -145,7 +145,7 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Paiements 100 % sur SumUp, ni panier ni checkout sur le site.
 - `config.platform.php = 8.4.1` dans composer.json : les dépendances restent compatibles avec la prod PHP 8.4 même si le poste local est en PHP 8.5.
 - Doctrine : les lazy objects natifs sont toujours actifs avec DoctrineBundle 3.x (l'option `enable_native_lazy_objects` est dépréciée) ; rien à configurer.
-- Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). Mailpit en local (`MAILER_DSN` dans `.env.dev`) ; sans Mailpit, mettre `MAILER_DSN=null://null` dans `.env.dev.local` et lire les emails dans le profiler.
+- Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). MailDev en local (SMTP `localhost:1025`, lecture sur http://localhost:1080, `MAILER_DSN` dans `.env.dev`) ; sans MailDev, mettre `MAILER_DSN=null://null` dans `.env.dev.local` et lire les emails dans le profiler.
 - Fuseau : `Europe/Paris` fixé dans `Kernel::boot()` (dates d'ateliers stockées et affichées en heure de Paris).
 - Turbo Drive est actif : un formulaire soumis doit rediriger (303) en cas de succès, ou répondre 422 s'il est invalide.
 - Base locale : MariaDB 11.3 de WAMP (port 3307), configurée dans `.env.local`. Tables forcées en InnoDB + utf8mb4 (`default_table_options` dans doctrine.yaml).

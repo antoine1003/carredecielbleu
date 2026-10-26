@@ -21,7 +21,7 @@ Journal des décisions prises pendant le développement. Les règles durables so
 | Images | Upload manuel dans l'admin, WebP multi-tailles (GD natif) ; images SumUp ignorées |
 | Variantes | Entité `ProductVariant` |
 | Visibilité | `Display item in Online Store?` = valeur initiale à la création uniquement |
-| Domaine / mails | Placeholders en variables d'environnement, envoi synchrone, Mailpit en local |
+| Domaine / mails | Placeholders en variables d'environnement, envoi synchrone, MailDev en local |
 
 ### Socle
 - Symfony 8.1.9, Doctrine ORM 3.7 / DoctrineBundle 3.3, EasyAdmin 5.8, PHPStan 2 (niveau 8), php-cs-fixer 3 (`@Symfony` + `@Symfony:risky` + `declare_strict_types`).
@@ -57,4 +57,4 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Confirmation de la date retenue depuis le tableau dates × inscrits de l'admin ; emails de confirmation et d'information envoyés immédiatement (synchrone). Annulation des autres dates en option.
 - RGPD : minimum de données (prénom, nom, email, téléphone facultatif), consentement obligatoire, suppression par la personne (lien) ou par l'admin, purge automatique 90 jours après l'atelier (`app:registrations:purge`, à planifier en cron). Durée à reporter dans la politique de confidentialité.
 - Export CSV (atelier ou global) : UTF-8 avec BOM, séparateur point-virgule, cellules commençant par = + - @ neutralisées (injection de formules).
-- Pas de Mailpit sur le poste : emails vérifiés dans le profiler avec `MAILER_DSN=null://null` (`.env.dev.local`, non versionné).
+- En local : MailDev (SMTP 1025, lecture sur http://localhost:1080).

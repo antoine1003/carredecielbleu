@@ -40,9 +40,9 @@
                     <div class="notice stack" role="status">
                         {% if result.created > 0 or result.existing > 0 %}
                             <p><strong>Merci, votre inscription est enregistrée.</strong></p>
-                            {% if result.emailSent %}
+                            {% if result.emailSent is same as(true) %}
                                 <p>Un email récapitulatif vient de vous être envoyé, avec un lien pour annuler si besoin.</p>
-                            {% else %}
+                            {% elseif result.emailSent is same as(false) %}
                                 <p>L'email récapitulatif n'a pas pu être envoyé. Votre inscription est bien enregistrée ; en cas de doute, <a href="{{ path('app_page', {slug: 'contact'}) }}">contactez-moi</a>.</p>
                             {% endif %}
                         {% endif %}

@@ -87,7 +87,7 @@ final class WorkshopController extends AbstractController
             'workshop' => $workshop,
             'form' => $form,
             'result' => 'ok' === $request->query->get('inscription')
-                ? ($request->getSession()->remove('workshop_registration_result') ?? ['created' => 1, 'existing' => 0, 'unavailable' => [], 'emailSent' => true])
+                ? ($request->getSession()->remove('workshop_registration_result') ?? ['created' => 1, 'existing' => 0, 'unavailable' => [], 'emailSent' => null])
                 : null,
             // Formulaire soumis mais invalide (le cas valide a redirigé plus haut) : 422 pour Turbo.
         ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));

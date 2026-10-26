@@ -26,6 +26,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class WorkshopSessionCrudController extends AbstractCrudController
 {
+    /** Pages du formulaire compact utilisé dans le formulaire de l'atelier. */
+    public const string PAGE_IN_WORKSHOP_NEW = 'new_in_workshop';
+    public const string PAGE_IN_WORKSHOP_EDIT = 'edit_in_workshop';
+
     public static function getEntityFqcn(): string
     {
         return WorkshopSession::class;
@@ -71,6 +75,21 @@ final class WorkshopSessionCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        // Formulaire compact d'une date, imbriqué dans le formulaire de l'atelier.
+        if (self::PAGE_IN_WORKSHOP_NEW === $pageName || self::PAGE_IN_WORKSHOP_EDIT === $pageName) {
+            yield DateTimeField::new('startsAt', 'Début')->setColumns('col-12 col-md-6');
+            yield DateTimeField::new('endsAt', 'Fin')->setColumns('col-12 col-md-6');
+            yield TextField::new('location', 'Lieu')->setColumns('col-12 col-md-6')
+                ->setHelp('Vide = lieu par défaut de l\'atelier');
+            yield IntegerField::new('capacity', 'Places')->setColumns('col-12 col-md-6')
+                ->setHelp('Vide = valeur de l\'atelier');
+            if (self::PAGE_IN_WORKSHOP_EDIT === $pageName) {
+                yield ChoiceField::new('status', 'Statut')->setColumns('col-12 col-md-6');
+            }
+
+            return;
+        }
+
         yield FormField::addColumn('col-12 col-xl-8');
         yield FormField::addFieldset('Date', 'fa fa-calendar');
         yield AssociationField::new('workshop', 'Atelier');

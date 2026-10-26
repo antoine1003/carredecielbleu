@@ -16,7 +16,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
@@ -123,13 +122,16 @@ final class WorkshopCrudController extends AbstractCrudController
         yield IntegerField::new('defaultCapacity', 'Places par date')->setColumns('col-12 col-md-6')
             ->setHelp('Valeur par défaut, modifiable pour chaque date.');
 
-        yield AssociationField::new('sessions', 'Dates')->onlyOnIndex();
+        // Nombre de dates (colonne de la liste), adossé à l'id pour ne pas déclarer « sessions » deux fois.
+        yield IntegerField::new('id', 'Dates')->onlyOnIndex()->setSortable(false)
+            ->formatValue(static fn ($value, Workshop $workshop): string => (string) $workshop->getSessions()->count());
 
         // ---------- Onglet 3 : dates proposées ----------
         yield FormField::addTab('Dates', 'fa fa-calendar-days')
             ->setHelp('Ajoutez autant de dates que vous voulez. Une date qui a déjà des inscrits ne peut pas être retirée ici : passez-la en « Annulée ».');
         yield CollectionField::new('sessions', false)
             ->onlyOnForms()
+            ->setColumns('col-12')
             ->useEntryCrudForm(
                 WorkshopSessionCrudController::class,
                 WorkshopSessionCrudController::PAGE_IN_WORKSHOP_NEW,

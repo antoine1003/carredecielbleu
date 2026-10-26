@@ -77,14 +77,14 @@ final class WorkshopSessionCrudController extends AbstractCrudController
     {
         // Formulaire compact d'une date, imbriqué dans le formulaire de l'atelier.
         if (self::PAGE_IN_WORKSHOP_NEW === $pageName || self::PAGE_IN_WORKSHOP_EDIT === $pageName) {
-            yield DateTimeField::new('startsAt', 'Début')->setColumns('col-12 col-md-6');
-            yield DateTimeField::new('endsAt', 'Fin')->setColumns('col-12 col-md-6');
-            yield TextField::new('location', 'Lieu')->setColumns('col-12 col-md-6')
+            yield DateTimeField::new('startsAt', 'Début')->setColumns('col-12 col-md-6 col-xxl-2');
+            yield DateTimeField::new('endsAt', 'Fin')->setColumns('col-12 col-md-6 col-xxl-2');
+            yield TextField::new('location', 'Lieu')->setColumns('col-12 col-md-6 col-xxl-4')
                 ->setHelp('Vide = lieu par défaut de l\'atelier');
-            yield IntegerField::new('capacity', 'Places')->setColumns('col-12 col-md-6')
+            yield IntegerField::new('capacity', 'Places')->setColumns('col-6 col-md-3 col-xxl-2')
                 ->setHelp('Vide = valeur de l\'atelier');
             if (self::PAGE_IN_WORKSHOP_EDIT === $pageName) {
-                yield ChoiceField::new('status', 'Statut')->setColumns('col-12 col-md-6');
+                yield ChoiceField::new('status', 'Statut')->setColumns('col-6 col-md-3 col-xxl-2');
             }
 
             return;

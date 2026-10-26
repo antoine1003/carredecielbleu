@@ -1,0 +1,14 @@
+/*
+ * Ajustements de l'admin EasyAdmin (chargé uniquement dans l'admin, via DashboardController::configureAssets).
+ * Les styles d'EasyAdmin sont en « cascade layers » : ces règles hors couche l'emportent sans !important.
+ */
+
+/* Contenu toujours sur toute la largeur, même si le navigateur a mémorisé la largeur « normale ». */
+.content-wrapper {
+    max-inline-size: none;
+}
+
+/* Poignée de bascule de largeur sur le bord droit : inutile puisque la largeur est fixée. */
+#content-resizer-handler {
+    display: none;
+}

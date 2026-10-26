@@ -34,6 +34,7 @@ Si `composer qa` n'existe pas encore, le créer dans les scripts de composer.jso
 - Le DashboardController se déclare avec l'attribut `#[AdminDashboard]` (et non plus avec une `#[Route]` classique sur `index()`).
 - Dans le menu, `linkToCrud()` est supprimé : utiliser `linkTo()` avec la classe du CrudController.
 - La configuration de routes EasyAdmin est obligatoire en 5.x : suivre la doc officielle, ne pas la deviner.
+- Ajustements visuels de l'admin : `assets/styles/admin.css`, chargé par `DashboardController::configureAssets()` (contenu pleine largeur, poignée de largeur masquée). La doc de l'API installée est dans `vendor/easycorp/easyadmin-bundle/skills/easyadmin/`.
 - Pour intégrer une action Symfony perso dans l'admin (ex. écran d'import CSV, tableau de confirmation des sessions), utiliser l'attribut `#[AdminRoute]` ou une action de CRUD, selon ce que recommande la doc.
 - Écrans admin sur mesure (import CSV, tableau dates × inscrits) : composants Twig EasyAdmin plutôt qu'un back-office parallèle.
 - Contenu à vérifier systématiquement dans la doc avant d'écrire : champs (`ImageField`, `MoneyField`, `AssociationField`), actions personnalisées, filtres, batch actions.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -26,6 +27,11 @@ final class DashboardController extends AbstractDashboardController
             // Contenu sur toute la largeur de l'écran (par défaut, EasyAdmin limite sa largeur).
             ->renderContentMaximized()
             ->setLocales(['fr']);
+    }
+
+    public function configureAssets(): Assets
+    {
+        return parent::configureAssets()->addCssFile('styles/admin.css');
     }
 
     public function configureMenuItems(): iterable

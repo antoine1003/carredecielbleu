@@ -1,0 +1,140 @@
+# CLAUDE.md — Carré de ciel bleu
+
+Site vitrine d'une artisane vitrailliste (auto-entreprise « Carré de ciel bleu ») : vitrine des produits en stock + gestion des ateliers de vitrail. Site 100 % en français. Le paiement n'est JAMAIS géré par le site : les achats se font sur SumUp via un lien externe.
+
+## Stack
+
+- Symfony 8.1.x (dernière version stable), PHP 8.4 minimum (exigé par Symfony 8.1), Twig en rendu serveur (SEO)
+- Doctrine ORM 3 + MariaDB/MySQL, migrations versionnées. Sur PHP 8.4, utiliser les lazy objects natifs de Doctrine
+- Admin : EasyAdmin 5.x (`easycorp/easyadmin-bundle` ^5.0). NE PAS utiliser la syntaxe EasyAdmin 4 (voir section dédiée)
+- Important : tes connaissances sur Symfony 8.1 et EasyAdmin 5 peuvent être incomplètes. Vérifie dans la documentation officielle (Context7 MCP si disponible) avant d'écrire du code sur une API que tu ne connais pas parfaitement
+- Front : AssetMapper + Stimulus/Turbo, CSS maison avec variables CSS. Pas de build Node lourd, JS minimal
+- Mailer : Symfony Mailer (templates Twig)
+- Prod : VPS Hostinger, Apache + PHP-FPM, DocumentRoot sur `public/`
+
+## Commandes
+
+```bash
+symfony serve -d                       # serveur local
+php bin/console doctrine:migrations:migrate
+php bin/console doctrine:fixtures:load # données de démo (jamais en prod)
+php bin/console app:catalog:import <fichier.csv>   # import du CSV SumUp
+php bin/console asset-map:compile      # assets de prod
+composer qa                            # phpstan + php-cs-fixer (dry-run)
+vendor/bin/phpstan analyse
+vendor/bin/php-cs-fixer fix
+```
+
+Si `composer qa` n'existe pas encore, le créer dans les scripts de composer.json.
+
+## EasyAdmin 5 : points d'attention
+
+- Le DashboardController se déclare avec l'attribut `#[AdminDashboard]` (et non plus avec une `#[Route]` classique sur `index()`).
+- Dans le menu, `linkToCrud()` est supprimé : utiliser `linkTo()` avec la classe du CrudController.
+- La configuration de routes EasyAdmin est obligatoire en 5.x : suivre la doc officielle, ne pas la deviner.
+- Pour intégrer une action Symfony perso dans l'admin (ex. écran d'import CSV, tableau de confirmation des sessions), utiliser l'attribut `#[AdminRoute]` ou une action de CRUD, selon ce que recommande la doc.
+- Écrans admin sur mesure (import CSV, tableau dates × inscrits) : composants Twig EasyAdmin plutôt qu'un back-office parallèle.
+- Contenu à vérifier systématiquement dans la doc avant d'écrire : champs (`ImageField`, `MoneyField`, `AssociationField`), actions personnalisées, filtres, batch actions.
+
+## Architecture
+
+```
+src/
+  Controller/        # contrôleurs publics, fins (pas de logique métier)
+  Controller/Admin/  # EasyAdmin : Dashboard + CrudControllers
+  Entity/            # Product, ProductVariant, ProductImage, Category, Workshop, WorkshopSession, Registration, SiteSetting, Page
+  Repository/
+  Service/
+    Catalog/         # CatalogImporter, SumupCsvParser, ProductSourceInterface
+    Workshop/        # RegistrationService, SessionConfirmationService
+    Seo/             # SeoMetaProvider, JsonLd builders, SitemapBuilder
+  Message/ + Handler # envois d'emails (Messenger si utile)
+templates/           # base.html.twig, pages/, components/, emails/
+assets/              # styles/ (tokens, base, components, pages), controllers/ (Stimulus)
+docs/                # samples/sumup-export.csv, décisions techniques
+```
+
+Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les entités. Injection par constructeur, `readonly` quand possible, types stricts partout (`declare(strict_types=1)`), attributs PHP 8 pour le mapping/routing.
+
+## Règles métier clés
+
+### Catalogue (SumUp, V1 = import CSV)
+- L'API publique SumUp n'expose pas le catalogue : ne jamais supposer un appel API pour lire produits/stock.
+- Import via l'admin (upload, aperçu des changements, validation) ET via `app:catalog:import`.
+- Le mapping des colonnes du CSV est centralisé et configurable (un seul endroit : `SumupCsvParser`). Le fichier d'exemple réel est dans `docs/samples/`.
+- Clé de rapprochement : `sumupItemId` si présent, sinon `sku`.
+- L'import NE DOIT JAMAIS écraser les champs enrichis côté site (photos supplémentaires, dimensions, technique, texte d'histoire, visibilité, `purchaseUrl` saisi à la main). Il met à jour : nom, prix, stock, description de base, catégorie.
+- Produit absent du CSV → marqué « non synchronisé », jamais supprimé automatiquement.
+- Variantes SumUp : entité `ProductVariant` (clé `sumupVariantId`, prix et stock propres). Dans le CSV, une ligne parente (Item id sans Variant id) est suivie de lignes sans nom portant `Variations` + `Variant id`. Prix public : « à partir de ».
+- Stock : `Track inventory = No` → stock non suivi = disponible (« Sur commande »). Stock suivi à 0 → comportement « épuisé » réglable (global dans les réglages, surchargeable par produit : masquer / afficher « Épuisé » / afficher « Sur commande »). Seuls les produits visibles sont publics.
+- `Display item in Online Store?` : valeur initiale de la visibilité à la création uniquement, jamais réécrite ensuite.
+- Images : uploadées à la main dans l'admin (les URLs d'images SumUp du CSV sont ignorées).
+- Bouton d'achat : lien externe vers `purchaseUrl` (saisi à la main, absent du CSV), `target="_blank" rel="noopener noreferrer"`, libellé « Acheter sur SumUp ». Sans `purchaseUrl` → bouton « Me contacter ».
+
+### Ateliers
+- Workshop → plusieurs WorkshopSession → plusieurs Registration.
+- Une personne peut s'inscrire à PLUSIEURS sessions du même atelier (sondage de disponibilités).
+- Statuts de session : ouvert, confirmé, complet, annulé.
+- L'admin voit un tableau dates × inscrits, confirme la date retenue → emails de confirmation (inscrits de cette date) et d'information (autres inscrits).
+- Annulation par lien tokenisé (token aléatoire non devinable).
+- Affichage public des inscrits : prénom + initiale du nom UNIQUEMENT si opt-in explicite, sinon seulement le nombre. Jamais d'email ni de téléphone en public.
+- Protection formulaires : CSRF, honeypot, rate limiting.
+- Aucun paiement d'atelier géré par le site.
+
+## Design — identité « Carré de ciel bleu »
+
+- Ambiance : lumière à travers le verre, nature, couleurs de vitrail. Doit se démarquer d'un template générique.
+- Palette en variables CSS (`assets/styles/_tokens.css`) : bleus profonds, ambre, vert végétal, rose/rouge de vitrail. Ne jamais coder une couleur en dur hors des tokens.
+- Deux familles de polices maximum : une display expressive + une lisible pour le texte. Servies en local (pas de CDN de fonts).
+- Éléments récurrents : formes organiques, motifs de plombs/cloisons, transparences. Animations sobres, respecter `prefers-reduced-motion`.
+- Mobile-first. Tester systématiquement 375 px, 768 px, 1280 px.
+- Accessibilité WCAG AA : contrastes, focus visibles, navigation clavier, `alt` pertinents, un seul `h1` par page.
+- Utiliser le skill `frontend-design` pour tout travail d'interface.
+
+## SEO (non négociable)
+
+- Chaque page : `<title>` et meta description uniques, canonical, Open Graph / Twitter cards, via `SeoMetaProvider`.
+- JSON-LD : Organization/LocalBusiness (accueil), Product + Offer + availability (fiche produit), Event (sessions d'atelier).
+- `sitemap.xml` dynamique, `robots.txt`, URLs propres avec slugs, 404/301 gérées.
+- Images : WebP, plusieurs tailles (`srcset`), `loading="lazy"` sauf image LCP, dimensions width/height renseignées.
+- Viser de bons Core Web Vitals : pas de JS bloquant, CSS critique léger.
+- Pas de tracker tiers. Analytics respectueux de la vie privée uniquement ; sinon bandeau cookies conforme.
+- Pages légales : mentions légales, politique de confidentialité.
+
+## Sécurité et RGPD
+
+- Secrets uniquement dans `.env.local` / variables d'environnement serveur. Ne jamais committer `.env.local`, de clés ou d'exports clients.
+- Données personnelles (inscriptions) : minimum nécessaire, durée de conservation documentée, export/suppression possible depuis l'admin.
+- Uploads : valider type et taille, renommer les fichiers, ne jamais exécuter ni servir depuis un chemin non contrôlé.
+- Admin : accès par rôle, mots de passe hashés, protection de la page de login.
+
+## Qualité et workflow
+
+- Travailler par phases, avec un commit clair par phase (Conventional Commits : `feat:`, `fix:`, `chore:`…).
+- Avant de déclarer une phase terminée : `composer qa` vert (PHPStan + php-cs-fixer) + vérification visuelle mobile/desktop.
+- Pas de tests unitaires ni fonctionnels pour le moment : ne pas installer PHPUnit, ne pas écrire de tests, sauf si je le demande. La vérification repose sur PHPStan, php-cs-fixer et le contrôle manuel (visuel, parcours d'inscription, import CSV avec le fichier d'exemple).
+- Les points sensibles (import CSV sans écrasement des champs enrichis, inscription multi-dates, annulation par token) sont à vérifier à la main en fin de phase, et le résumé de phase indique ce qui a été vérifié.
+- Demander avant tout changement d'architecture, ajout de dépendance lourde ou modification du schéma de données déjà en production.
+- Ne pas inventer de contenu commercial (prix, textes de l'artisane, avis, adresses) : utiliser des placeholders explicites ou les données fournies.
+- Garder ce fichier à jour quand une convention ou une décision change.
+
+## Déploiement (Apache sur VPS)
+
+- PHP 8.4+ obligatoire sur le VPS (vérifier la version avec `php -v` et la config PHP-FPM utilisée par Apache). Extensions requises : intl, mbstring, pdo_mysql, gd ou imagick (images), zip, xml, curl, opcache.
+- DocumentRoot = `public/`, `AllowOverride All`, `mod_rewrite` actif, PHP-FPM.
+- HTTPS (Let's Encrypt), redirection http → https et www → apex (ou l'inverse, un seul choix), en-têtes de sécurité de base.
+- Procédure de déploiement documentée dans `README.md` : `composer install --no-dev --optimize-autoloader`, migrations, `asset-map:compile`, `cache:clear` en `APP_ENV=prod`.
+- Sauvegarde régulière de la base et du dossier d'uploads.
+
+## Décisions déjà prises
+
+- Symfony 8.1 (version standard, hors LTS) : prévoir de suivre les mises à jour mineures régulièrement. Le support d'une version standard est court (fin de support de 8.1 : janvier 2027), donc planifier le passage à 8.2 puis, à terme, à la prochaine LTS.
+- EasyAdmin 5 (pas 4).
+- V1 : catalogue alimenté par import CSV SumUp (pas d'API catalogue).
+- Rendu serveur Twig (pas d'Angular) pour le SEO et la maintenabilité.
+- Paiements 100 % sur SumUp, ni panier ni checkout sur le site.
+- `config.platform.php = 8.4.1` dans composer.json : les dépendances restent compatibles avec la prod PHP 8.4 même si le poste local est en PHP 8.5.
+- Doctrine : les lazy objects natifs sont toujours actifs avec DoctrineBundle 3.x (l'option `enable_native_lazy_objects` est dépréciée) ; rien à configurer.
+- Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). Mailpit en local (`MAILER_DSN` dans `.env.dev`).
+- Base locale : MariaDB 11.3 de WAMP (port 3307), configurée dans `.env.local`.
+- Windows : passer les contraintes Composer avec `~` ou les écrire dans composer.json (`composer.bat` mange le caractère `^`).

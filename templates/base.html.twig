@@ -3,6 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        {# Turbo : fondu entre les pages (View Transitions, coupé si « réduire les animations ») #}
+        <meta name="view-transition" content="same-origin">
         <title>{% block title %}{{ site_settings().siteName }}{% endblock %}</title>
         <meta name="description" content="{% block description %}{{ site_settings().homeMetaDescription }}{% endblock %}">
         {% block meta %}{% endblock %}

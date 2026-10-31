@@ -1,0 +1,6 @@
+{# Réponse Turbo Stream : remplace le bloc newsletter sur place, sans recharger la page. #}
+<turbo-stream action="replace" target="newsletter">
+    <template>
+        {{ include('partials/_newsletter.html.twig') }}
+    </template>
+</turbo-stream>

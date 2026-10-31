@@ -160,7 +160,8 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Doctrine : les lazy objects natifs sont toujours actifs avec DoctrineBundle 3.x (l'option `enable_native_lazy_objects` est dépréciée) ; rien à configurer.
 - Emails envoyés en synchrone en V1 (pas de worker Messenger sur le VPS). MailDev en local (SMTP `localhost:1025`, lecture sur http://localhost:1080, `MAILER_DSN` dans `.env.dev`) ; sans MailDev, mettre `MAILER_DSN=null://null` dans `.env.dev.local` et lire les emails dans le profiler.
 - Fuseau : `Europe/Paris` fixé dans `Kernel::boot()` (dates d'ateliers stockées et affichées en heure de Paris).
-- Turbo Drive est actif : un formulaire soumis doit rediriger (303) en cas de succès, ou répondre 422 s'il est invalide.
+- Turbo Drive est actif : un formulaire soumis doit rediriger (303) en cas de succès, ou répondre 422 s'il est invalide. Navigation sans rechargement + fondu court entre pages (`<meta name="view-transition">`, coupé par `prefers-reduced-motion`).
+- Formulaire qui ne doit pas recharger la page (newsletter) : réponse Turbo Stream (`TurboBundle::STREAM_FORMAT`, gabarit `*.stream.html.twig` qui remplace le bloc), avec repli sans JavaScript par redirection 303 + flash. Focus déplacé sur le message ou le champ en erreur (contrôleur Stimulus `autofocus`).
 - Base locale : MariaDB 11.3 de WAMP (port 3307), configurée dans `.env.local`. Tables forcées en InnoDB + utf8mb4 (`default_table_options` dans doctrine.yaml).
 - PHPStan : `doctrine.allowNullablePropertyForRequiredField: true`, car les propriétés éditées par formulaire sont nullables (exigence Symfony Forms / EasyAdmin) alors que la colonne est NOT NULL.
 - Texte riche (descriptions, pages) : assaini avec le sanitizer `app.rich_text` à l'import ET à l'affichage (`|sanitize_html('app.rich_text')`).

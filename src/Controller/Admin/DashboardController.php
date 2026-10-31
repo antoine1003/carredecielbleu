@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Repository\WorkshopRepository;
+use App\Service\Workshop\WorkshopOverview;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -14,10 +16,22 @@ use Symfony\Component\HttpFoundation\Response;
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 final class DashboardController extends AbstractDashboardController
 {
+    public function __construct(
+        private readonly WorkshopRepository $workshops,
+        private readonly WorkshopOverview $overview,
+    ) {
+    }
+
+    /** Accueil de l'admin : les ateliers à venir, dans l'ordre où il faut s'en occuper. */
     public function index(): Response
     {
-        // Tableau de bord détaillé prévu en phase « admin finalisé » : on ouvre les produits.
-        return $this->redirectToRoute('admin_product_index');
+        $workshops = $this->workshops->findBy([], ['title' => 'ASC']);
+        $upcoming = $this->overview->withUpcomingDates($workshops);
+
+        return $this->render('admin/dashboard.html.twig', [
+            'upcoming' => $upcoming,
+            'withoutDates' => \count($workshops) - \count($upcoming),
+        ]);
     }
 
     public function configureDashboard(): Dashboard
@@ -36,6 +50,8 @@ final class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
+        yield MenuItem::linkToDashboard('Accueil', 'fa fa-house');
+
         yield MenuItem::section('Boutique');
         yield MenuItem::linkTo(ProductCrudController::class, 'Produits', 'fa fa-gem');
         yield MenuItem::linkTo(CategoryCrudController::class, 'Catégories', 'fa fa-tags');

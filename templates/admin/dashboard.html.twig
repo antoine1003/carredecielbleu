@@ -1,0 +1,51 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{#
+    Accueil de l'admin : ateliers à venir (à décider d'abord), puis raccourcis.
+    Variables : upcoming (list<WorkshopSummary>), withoutDates (int).
+#}
+
+{% block page_title %}Accueil{% endblock %}
+{% block content_title %}Accueil{% endblock %}
+
+{% block main %}
+<div class="ws">
+    <section class="ws-section" aria-labelledby="home-workshops">
+        <div class="ws-section__head">
+            <h2 id="home-workshops">Ateliers à venir</h2>
+            <a class="btn btn-secondary btn-sm" href="{{ path('admin_workshop_new') }}"><i class="fa fa-plus"></i> Créer un atelier</a>
+        </div>
+
+        {% if upcoming is empty %}
+            <p class="ws-home-empty">Aucun atelier n'a de date à venir. Créez un atelier ou ajoutez des dates à un atelier existant.</p>
+        {% else %}
+            <ul class="ws-home-list">
+                {% for summary in upcoming %}
+                    <li class="ws-home-item ws-home-item--{{ summary.state.value }}">
+                        <a class="ws-home-item__title" href="{{ path('admin_workshop_planning', {id: summary.workshop.id}) }}">{{ summary.workshop.title }}</a>
+                        {{ include('admin/workshop/_status_line.html.twig') }}
+                        {% if summary.state.value == 'to_decide' %}
+                            <a class="btn btn-primary btn-sm ws-home-item__action" href="{{ path('admin_workshop_planning', {id: summary.workshop.id}) }}">Choisir la date</a>
+                        {% else %}
+                            <a class="btn btn-secondary btn-sm ws-home-item__action" href="{{ path('admin_workshop_planning', {id: summary.workshop.id}) }}">Voir le suivi</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if withoutDates > 0 %}
+            <p class="ws-home-note">{{ withoutDates }} autre{{ withoutDates > 1 ? 's' }} atelier{{ withoutDates > 1 ? 's' }} sans date à venir : <a href="{{ path('admin_workshop_index') }}">voir tous les ateliers</a>.</p>
+        {% endif %}
+    </section>
+
+    <section class="ws-section" aria-labelledby="home-shortcuts">
+        <h2 id="home-shortcuts">Raccourcis</h2>
+        <p class="ws-home-shortcuts">
+            <a class="btn btn-secondary" href="{{ path('admin_product_index') }}"><i class="fa fa-gem"></i> Produits</a>
+            <a class="btn btn-secondary" href="{{ path('admin_catalog_import_index') }}"><i class="fa fa-file-import"></i> Importer le catalogue SumUp</a>
+            <a class="btn btn-secondary" href="{{ path('admin_registration_index') }}"><i class="fa fa-users"></i> Toutes les inscriptions</a>
+            <a class="btn btn-secondary" href="/" target="_blank" rel="noopener"><i class="fa fa-arrow-up-right-from-square"></i> Voir le site</a>
+        </p>
+    </section>
+</div>
+{% endblock %}

@@ -1,88 +1,240 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
+{% import 'admin/workshop/_macros.html.twig' as when %}
+
+{#
+    Suivi d'un atelier : bandeau « où en est-on », dates proposées avec jauge de remplissage
+    et bouton « Retenir cette date », puis dates passées et tableau détaillé (repliés).
+    Variables : workshop, summary (WorkshopSummary), sessions, people.
+#}
 
 {% set status_colors = {open: 'info', confirmed: 'success', full: 'warning', cancelled: 'secondary'} %}
 
-{% block page_title %}Inscrits : {{ workshop.title }}{% endblock %}
-{% block content_title %}Inscrits : {{ workshop.title }}{% endblock %}
+{% block page_title %}{{ workshop.title }}{% endblock %}
+{% block content_title %}{{ workshop.title }}{% endblock %}
 
 {% block page_actions %}
-    <a class="btn btn-secondary" href="{{ path('admin_workshop_export', {id: workshop.id}) }}"><i class="fa fa-file-csv"></i> Exporter en CSV</a>
-    <a class="btn btn-secondary" href="{{ path('admin_workshop_session_new') }}"><i class="fa fa-plus"></i> Ajouter une date</a>
     <a class="btn btn-secondary" href="{{ path('admin_workshop_edit', {entityId: workshop.id}) }}"><i class="fa fa-pen"></i> Modifier l'atelier</a>
+    {% if workshop.published %}
+        <a class="btn btn-secondary" href="{{ path('app_workshop', {slug: workshop.slug}) }}" target="_blank" rel="noopener"><i class="fa fa-arrow-up-right-from-square"></i> Voir sur le site</a>
+    {% endif %}
 {% endblock %}
 
 {% block main %}
-    <p>Chaque ligne est une personne, chaque colonne une date proposée. Confirmez la date retenue : ses inscrits reçoivent un email de confirmation, les inscrits des autres dates un email d'information.</p>
+<div class="ws">
 
-    {% if sessions is empty %}
-        <p class="mt-4">Aucune date n'est encore proposée pour cet atelier.</p>
-    {% else %}
-        <div class="table-responsive mt-4">
-            <table class="table datagrid">
-                <caption class="visually-hidden">Inscriptions par date pour l'atelier {{ workshop.title }}</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Personne</th>
-                        {% for session in sessions %}
-                            <th scope="col" class="text-center" style="min-width: 11rem;">
-                                <div>{{ session.startsAt|format_datetime('medium', 'short', locale: 'fr') }}</div>
-                                <twig:ea:Badge :color="status_colors[session.status.value]">{{ session.status.label }}</twig:ea:Badge>
-                            </th>
+    {# ---------- Où en est-on ? ---------- #}
+    {% if summary.confirmed %}
+        {% set c = summary.confirmed %}
+        <section class="ws-banner ws-banner--confirmed" aria-labelledby="ws-banner-title">
+            <div class="ws-banner__icon" aria-hidden="true"><i class="fa fa-calendar-check"></i></div>
+            <div class="ws-banner__body">
+                <p class="ws-banner__kicker">L'atelier aura lieu le</p>
+                <h2 class="ws-banner__title" id="ws-banner-title">{{ when.day(c.session.startsAt)|capitalize }}</h2>
+                <p class="ws-banner__meta">
+                    {{ when.hours(c.session) }}{% if c.session.effectiveLocation %} · {{ c.session.effectiveLocation }}{% endif %}
+                    · <strong>{{ c.registered }} participant{{ c.registered > 1 ? 's' }}</strong> sur {{ c.capacity }} places
+                </p>
+                {% if c.session.registrations is not empty %}
+                    <ul class="ws-people ws-people--contacts">
+                        {% for r in c.session.registrations %}
+                            <li>
+                                <a href="{{ path('admin_registration_edit', {entityId: r.id}) }}">{{ r.firstName }} {{ r.lastName }}</a>
+                                <span>{{ r.email }}{% if r.phone %} · {{ r.phone }}{% endif %}</span>
+                            </li>
                         {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for person in people %}
+                    </ul>
+                    <p class="ws-banner__actions">
+                        <a class="btn btn-primary" href="mailto:?bcc={{ c.session.registrations|map(r => r.email)|join(',')|url_encode }}"><i class="fa fa-envelope"></i> Écrire aux participants</a>
+                        <a class="btn btn-secondary" href="{{ path('admin_workshop_export', {id: workshop.id}) }}"><i class="fa fa-file-csv"></i> Télécharger la liste</a>
+                    </p>
+                {% endif %}
+            </div>
+        </section>
+    {% elseif summary.state.value == 'to_decide' %}
+        <section class="ws-banner ws-banner--decide" aria-labelledby="ws-banner-title">
+            <div class="ws-banner__icon" aria-hidden="true"><i class="fa fa-hand-pointer"></i></div>
+            <div class="ws-banner__body">
+                <p class="ws-banner__kicker">Date à choisir</p>
+                <h2 class="ws-banner__title" id="ws-banner-title">{{ when.people(summary.peopleCount)|capitalize }} inscrite{{ summary.peopleCount > 1 ? 's' }} : choisissez la date de l'atelier</h2>
+                {% if summary.mostRequested %}
+                    {% set top = summary.mostRequested %}
+                    <p class="ws-banner__meta">La date qui réunit le plus de monde : <strong>{{ when.short(top.session.startsAt) }}</strong>, avec {{ when.people(top.registered) }}.</p>
+                    <p class="ws-banner__actions">
+                        <twig:ea:Modal:Trigger target="#ws-confirm-{{ top.session.id }}" variant="primary" icon="fa fa-check">Retenir cette date</twig:ea:Modal:Trigger>
+                    </p>
+                {% endif %}
+            </div>
+        </section>
+    {% elseif summary.state.value == 'waiting' %}
+        <section class="ws-banner ws-banner--waiting" aria-labelledby="ws-banner-title">
+            <div class="ws-banner__icon" aria-hidden="true"><i class="fa fa-hourglass-half"></i></div>
+            <div class="ws-banner__body">
+                <p class="ws-banner__kicker">En attente d'inscriptions</p>
+                <h2 class="ws-banner__title" id="ws-banner-title">Personne n'est encore inscrit</h2>
+                <p class="ws-banner__meta">
+                    {% if workshop.published %}
+                        Les dates sont en ligne : partagez la page de l'atelier pour faire venir du monde.
+                    {% else %}
+                        L'atelier n'est pas encore publié : personne ne peut le voir sur le site.
+                        <a href="{{ path('admin_workshop_edit', {entityId: workshop.id}) }}">Le publier</a>.
+                    {% endif %}
+                </p>
+            </div>
+        </section>
+    {% else %}
+        <section class="ws-banner ws-banner--empty" aria-labelledby="ws-banner-title">
+            <div class="ws-banner__icon" aria-hidden="true"><i class="fa fa-calendar-plus"></i></div>
+            <div class="ws-banner__body">
+                <p class="ws-banner__kicker">Aucune date à venir</p>
+                <h2 class="ws-banner__title" id="ws-banner-title">Proposez des dates pour ouvrir les inscriptions</h2>
+                <p class="ws-banner__actions">
+                    <a class="btn btn-primary" href="{{ path('admin_workshop_edit', {entityId: workshop.id}) }}#tab-dates"><i class="fa fa-plus"></i> Ajouter des dates</a>
+                </p>
+            </div>
+        </section>
+    {% endif %}
+
+    {# ---------- Dates à venir ---------- #}
+    {% if summary.upcoming is not empty %}
+        <section class="ws-section" aria-labelledby="ws-dates-title">
+            <div class="ws-section__head">
+                <h2 id="ws-dates-title">Dates proposées</h2>
+                <a class="btn btn-secondary btn-sm" href="{{ path('admin_workshop_edit', {entityId: workshop.id}) }}#tab-dates"><i class="fa fa-plus"></i> Ajouter ou modifier des dates</a>
+            </div>
+
+            <ol class="ws-dates">
+                {% for s in summary.upcoming %}
+                    {% set status = s.session.status.value %}
+                    {% set is_top = summary.mostRequested and summary.mostRequested.session is same as(s.session) %}
+                    <li class="ws-date ws-date--{{ status }}{{ is_top ? ' ws-date--top' }}">
+                        <div class="ws-date__cal" aria-hidden="true">
+                            <span class="ws-date__month">{{ s.session.startsAt|format_date(pattern: 'MMM', locale: 'fr')|trim('.') }}</span>
+                            <span class="ws-date__day">{{ s.session.startsAt|format_date(pattern: 'd', locale: 'fr') }}</span>
+                            <span class="ws-date__weekday">{{ s.session.startsAt|format_date(pattern: 'EEE', locale: 'fr') }}</span>
+                        </div>
+
+                        <div class="ws-date__main">
+                            <h3 class="ws-date__when">
+                                {{ when.day(s.session.startsAt)|capitalize }}
+                                <span>{{ when.hours(s.session) }}</span>
+                            </h3>
+                            {% if s.session.effectiveLocation %}<p class="ws-date__place"><i class="fa fa-location-dot" aria-hidden="true"></i> {{ s.session.effectiveLocation }}</p>{% endif %}
+
+                            <div class="ws-gauge" role="img" aria-label="{{ s.registered }} inscrits sur {{ s.capacity }} places">
+                                <span class="ws-gauge__bar" style="width: {{ s.fillPercent }}%"></span>
+                            </div>
+                            <p class="ws-date__count"><strong>{{ s.registered }}</strong> inscrit{{ s.registered > 1 ? 's' }} sur {{ s.capacity }} places</p>
+
+                            {% if s.session.registrations is not empty %}
+                                <ul class="ws-people">
+                                    {% for r in s.session.registrations %}
+                                        <li><a href="{{ path('admin_registration_edit', {entityId: r.id}) }}" title="{{ r.email }}{{ r.phone ? ' · ' ~ r.phone }}">{{ r.firstName }} {{ r.lastName }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+
+                        <div class="ws-date__side">
+                            {% if status == 'confirmed' %}
+                                <twig:ea:Badge color="success" icon="fa fa-check">Date retenue</twig:ea:Badge>
+                            {% else %}
+                                <twig:ea:Badge color="{{ status_colors[status] }}">{{ s.session.status.label }}</twig:ea:Badge>
+                            {% endif %}
+                            {% if is_top %}<span class="ws-date__hint"><i class="fa fa-star" aria-hidden="true"></i> La plus demandée</span>{% endif %}
+                            {% if s.canConfirm and not summary.confirmed %}
+                                <twig:ea:Modal:Trigger target="#ws-confirm-{{ s.session.id }}" variant="{{ is_top ? 'primary' : 'default' }}">Retenir cette date</twig:ea:Modal:Trigger>
+                            {% endif %}
+                            <a class="ws-date__edit" href="{{ path('admin_workshop_session_edit', {entityId: s.session.id}) }}">Modifier cette date</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ol>
+        </section>
+
+        {# Fenêtres de confirmation, une par date que l'on peut retenir #}
+        {% for s in summary.upcoming|filter(s => s.canConfirm and not summary.confirmed) %}
+            {% set form_id = 'ws-confirm-form-' ~ s.session.id %}
+            <twig:ea:Modal id="ws-confirm-{{ s.session.id }}" size="lg" topIcon="fa fa-calendar-check" title="Retenir le {{ when.short(s.session.startsAt) }} ?">
+                <twig:block name="body">
+                    {% import 'admin/workshop/_macros.html.twig' as when %}
+                    <form id="{{ outerScope.form_id }}" method="post" action="{{ path('admin_workshop_session_confirm', {id: outerScope.s.session.id}) }}" class="ws-confirm">
+                        <input type="hidden" name="_token" value="{{ csrf_token('confirm_session' ~ outerScope.s.session.id) }}">
+                        <p>Voici ce qui va se passer :</p>
+                        <ul>
+                            <li><strong>{{ when.people(outerScope.s.registered)|capitalize }}</strong> inscrite{{ outerScope.s.registered > 1 ? 's' }} à cette date {{ outerScope.s.registered > 1 ? 'recevront' : 'recevra' }} un email : l'atelier est confirmé.</li>
+                            {% if outerScope.s.othersToNotify > 0 %}
+                                <li><strong>{{ when.people(outerScope.s.othersToNotify)|capitalize }}</strong> inscrite{{ outerScope.s.othersToNotify > 1 ? 's' }} seulement à d'autres dates {{ outerScope.s.othersToNotify > 1 ? 'recevront' : 'recevra' }} un email pour {{ outerScope.s.othersToNotify > 1 ? 'les' : 'la' }} prévenir.</li>
+                            {% endif %}
+                        </ul>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="cancel_others" value="1" id="cancel-others-{{ outerScope.s.session.id }}" checked>
+                            <label class="form-check-label" for="cancel-others-{{ outerScope.s.session.id }}">Ne plus proposer les autres dates (elles passent en « Annulée »)</label>
+                        </div>
+                        <p class="ws-confirm__warning">Les emails partent tout de suite : cette action ne peut pas être annulée.</p>
+                    </form>
+                </twig:block>
+                <twig:block name="footer">
+                    <twig:ea:Modal:Close>Pas maintenant</twig:ea:Modal:Close>
+                    <button type="submit" form="{{ outerScope.form_id }}" class="btn btn-primary"><i class="fa fa-check"></i> Oui, retenir cette date</button>
+                </twig:block>
+            </twig:ea:Modal>
+        {% endfor %}
+    {% endif %}
+
+    {# ---------- Dates passées ---------- #}
+    {% if summary.past is not empty %}
+        <details class="ws-more">
+            <summary>Dates passées ({{ summary.past|length }})</summary>
+            <ul class="ws-past">
+                {% for s in summary.past %}
+                    <li>
+                        {{ when.day(s.session.startsAt)|capitalize }}, {{ when.hours(s.session) }}
+                        · {{ s.registered }} inscrit{{ s.registered > 1 ? 's' }}
+                        · <twig:ea:Badge color="{{ status_colors[s.session.status.value] }}">{{ s.session.status.value == 'confirmed' ? 'A eu lieu' : s.session.status.label }}</twig:ea:Badge>
+                    </li>
+                {% endfor %}
+            </ul>
+        </details>
+    {% endif %}
+
+    {# ---------- Tableau détaillé : qui est disponible à quelle date ---------- #}
+    {% if people is not empty %}
+        <details class="ws-more">
+            <summary>Qui est disponible à quelle date ? (tableau détaillé)</summary>
+            <div class="table-responsive">
+                <table class="table datagrid">
+                    <caption class="visually-hidden">Disponibilités de chaque personne pour l'atelier {{ workshop.title }}</caption>
+                    <thead>
                         <tr>
-                            <th scope="row">
-                                <a href="{{ path('admin_registration_edit', {entityId: person.registration.id}) }}">{{ person.registration.firstName }} {{ person.registration.lastName }}</a>
-                                <div class="small text-muted">{{ person.registration.email }}{% if person.registration.phone %} · {{ person.registration.phone }}{% endif %}</div>
-                            </th>
+                            <th scope="col">Personne</th>
                             {% for session in sessions %}
-                                <td class="text-center">
-                                    {% if person.sessions[session.id] ?? false %}
-                                        <i class="fa fa-check text-success" aria-hidden="true"></i><span class="visually-hidden">disponible</span>
-                                    {% else %}
-                                        <span aria-hidden="true">—</span><span class="visually-hidden">non</span>
-                                    {% endif %}
-                                </td>
+                                <th scope="col" class="text-center">{{ session.startsAt|format_date(pattern: 'EEE d MMM', locale: 'fr') }}<br><span class="small text-muted">{{ when.hours(session) }}</span></th>
                             {% endfor %}
                         </tr>
-                    {% else %}
-                        <tr><td colspan="{{ sessions|length + 1 }}">Aucune inscription pour le moment.</td></tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th scope="row">Inscrits / places</th>
-                        {% for session in sessions %}
-                            <td class="text-center"><strong>{{ session.registrations|length }}</strong> / {{ session.effectiveCapacity }}</td>
+                    </thead>
+                    <tbody>
+                        {% for person in people %}
+                            <tr>
+                                <th scope="row">
+                                    <a href="{{ path('admin_registration_edit', {entityId: person.registration.id}) }}">{{ person.registration.firstName }} {{ person.registration.lastName }}</a>
+                                    <div class="small text-muted">{{ person.registration.email }}{% if person.registration.phone %} · {{ person.registration.phone }}{% endif %}</div>
+                                </th>
+                                {% for session in sessions %}
+                                    <td class="text-center">
+                                        {% if person.sessions[session.id] ?? false %}
+                                            <i class="fa fa-check text-success" aria-hidden="true"></i><span class="visually-hidden">disponible</span>
+                                        {% else %}
+                                            <span aria-hidden="true">—</span><span class="visually-hidden">non</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
                         {% endfor %}
-                    </tr>
-                    <tr>
-                        <th scope="row">Date retenue</th>
-                        {% for session in sessions %}
-                            <td class="text-center">
-                                {% if session.status.value == 'confirmed' %}
-                                    Confirmée le {{ session.confirmedAt ? session.confirmedAt|format_date('short', locale: 'fr') }}
-                                {% elseif session.status.value != 'cancelled' and session.startsAt > date() %}
-                                    <form method="post" action="{{ path('admin_workshop_session_confirm', {id: session.id}) }}"
-                                          onsubmit="return confirm('Confirmer le {{ session.startsAt|format_datetime('long', 'short', locale: 'fr')|e('js') }} ? Les emails partent immédiatement.');">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('confirm_session' ~ session.id) }}">
-                                        <div class="form-check text-start d-inline-block mb-2">
-                                            <input class="form-check-input" type="checkbox" name="cancel_others" value="1" id="cancel-others-{{ session.id }}">
-                                            <label class="form-check-label small" for="cancel-others-{{ session.id }}">Annuler les autres dates</label>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-sm">Confirmer cette date</button>
-                                    </form>
-                                {% else %}
-                                    <span class="text-muted">—</span>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
+            <p><a class="btn btn-secondary btn-sm" href="{{ path('admin_workshop_export', {id: workshop.id}) }}"><i class="fa fa-file-csv"></i> Télécharger toutes les inscriptions (CSV)</a></p>
+        </details>
     {% endif %}
+</div>
 {% endblock %}

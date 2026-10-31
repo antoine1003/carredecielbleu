@@ -12,3 +12,210 @@
 #content-resizer-handler {
     display: none;
 }
+
+/* ---------- Ateliers : suivi d'un atelier (templates/admin/workshop/planning.html.twig) ----------
+   Couleurs Bootstrap/EasyAdmin (--bs-*) pour suivre le thème clair ou sombre de l'admin. */
+.ws {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 68rem;
+}
+
+.ws-banner {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+}
+
+.ws-banner--confirmed { background: var(--bs-success-bg-subtle); border-color: var(--bs-success-border-subtle); }
+.ws-banner--decide { background: var(--bs-warning-bg-subtle); border-color: var(--bs-warning-border-subtle); }
+.ws-banner--waiting { background: var(--bs-info-bg-subtle); border-color: var(--bs-info-border-subtle); }
+
+.ws-banner__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: var(--bs-body-bg);
+    font-size: 1.4rem;
+}
+
+.ws-banner--confirmed .ws-banner__icon { color: var(--bs-success-text-emphasis); }
+.ws-banner--decide .ws-banner__icon { color: var(--bs-warning-text-emphasis); }
+.ws-banner--waiting .ws-banner__icon { color: var(--bs-info-text-emphasis); }
+
+.ws-banner__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.ws-banner__body > * { margin: 0; }
+.ws-banner__kicker { font-weight: 600; color: var(--bs-secondary-color); }
+.ws-banner__title { font-size: 1.6rem; font-weight: 700; line-height: 1.2; }
+.ws-banner__meta { font-size: 1.05rem; }
+.ws-banner__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem !important; }
+
+.ws-section { display: flex; flex-direction: column; gap: 1rem; }
+.ws-section__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.ws-section__head h2,
+.ws-section > h2 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+
+/* Une date = une ligne : calendrier, détails et jauge, statut et action */
+.ws-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ws-date {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 1.25rem;
+    align-items: start;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg);
+}
+
+.ws-date--top { border-color: var(--bs-warning); box-shadow: inset 4px 0 0 var(--bs-warning); }
+.ws-date--confirmed { border-color: var(--bs-success); box-shadow: inset 4px 0 0 var(--bs-success); }
+.ws-date--cancelled { opacity: 0.6; }
+
+.ws-date__cal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 4.25rem;
+    padding: 0.4rem 0 0.5rem;
+    border-radius: 0.6rem;
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    line-height: 1.1;
+}
+
+.ws-date__month { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bs-danger-text-emphasis); }
+.ws-date__day { font-size: 1.9rem; font-weight: 700; }
+.ws-date__weekday { font-size: 0.8rem; color: var(--bs-secondary-color); }
+
+.ws-date__main { display: flex; flex-direction: column; gap: 0.4rem; }
+.ws-date__main > * { margin: 0; }
+.ws-date__when { font-size: 1.1rem; font-weight: 700; }
+.ws-date__when span { font-weight: 400; color: var(--bs-secondary-color); margin-left: 0.4rem; white-space: nowrap; }
+.ws-date__place { color: var(--bs-secondary-color); }
+
+.ws-gauge {
+    height: 0.6rem;
+    max-width: 22rem;
+    margin-top: 0.4rem !important;
+    border-radius: 999px;
+    background: var(--bs-secondary-bg);
+    overflow: hidden;
+}
+
+.ws-gauge__bar { display: block; height: 100%; border-radius: inherit; background: var(--bs-primary); }
+.ws-date--confirmed .ws-gauge__bar { background: var(--bs-success); }
+
+.ws-people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ws-people a {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.ws-people a:hover { background: var(--bs-tertiary-bg); text-decoration: underline; }
+
+/* Participants de la date retenue : nom + coordonnées */
+.ws-people--contacts { flex-direction: column; gap: 0.3rem; }
+.ws-people--contacts li { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; align-items: baseline; }
+.ws-people--contacts a { padding: 0; background: none; font-size: 1rem; font-weight: 600; }
+.ws-people--contacts span { color: var(--bs-secondary-color); font-size: 0.9rem; }
+
+.ws-date__side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6rem;
+    text-align: right;
+}
+
+.ws-date__hint { font-size: 0.875rem; font-weight: 600; color: var(--bs-warning-text-emphasis); }
+.ws-date__edit { font-size: 0.875rem; }
+
+.ws-confirm ul { padding-left: 1.2rem; }
+.ws-confirm li + li { margin-top: 0.4rem; }
+.ws-confirm__warning { margin: 1rem 0 0; font-size: 0.9rem; color: var(--bs-secondary-color); }
+
+.ws-more { border-top: 1px solid var(--bs-border-color); padding-top: 1rem; }
+.ws-more summary { cursor: pointer; font-weight: 600; }
+.ws-more[open] summary { margin-bottom: 1rem; }
+.ws-past { display: flex; flex-direction: column; gap: 0.4rem; padding-left: 1.2rem; }
+
+/* Téléphone : statut et bouton passent sous la date */
+@media (max-width: 47.99rem) {
+    .ws-banner { flex-direction: column; padding: 1.25rem; }
+    .ws-date { grid-template-columns: auto minmax(0, 1fr); }
+    .ws-date__side { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; text-align: left; }
+}
+
+/* Liste des ateliers */
+.ws-list-title { font-weight: 600; }
+.ws-list-status { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.6rem; }
+.ws-list-status__text { color: var(--bs-secondary-color); }
+
+/* Accueil de l'admin */
+.ws-home-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.ws-home-item {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr) auto;
+    gap: 0.5rem 1.25rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: var(--bs-body-bg);
+}
+
+.ws-home-item + .ws-home-item { border-top: 1px solid var(--bs-border-color); }
+.ws-home-item--to_decide { box-shadow: inset 4px 0 0 var(--bs-warning); }
+.ws-home-item--confirmed { box-shadow: inset 4px 0 0 var(--bs-success); }
+.ws-home-item__title { font-weight: 700; font-size: 1.05rem; }
+.ws-home-note { margin: 0; color: var(--bs-secondary-color); }
+.ws-home-empty { margin: 0; }
+.ws-home-shortcuts { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; }
+
+@media (max-width: 47.99rem) {
+    .ws-home-item { grid-template-columns: 1fr; }
+    .ws-home-item__action { justify-self: start; }
+}

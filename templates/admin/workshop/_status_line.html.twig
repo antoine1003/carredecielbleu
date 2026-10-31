@@ -1,0 +1,14 @@
+{# Situation d'un atelier en une ligne : badge + précision (variable : summary). #}
+{% import 'admin/workshop/_macros.html.twig' as when %}
+<div class="ws-list-status">
+    <twig:ea:Badge color="{{ summary.state.color }}">{{ summary.state.label }}</twig:ea:Badge>
+    <span class="ws-list-status__text">
+        {% if summary.confirmed %}
+            {{ when.short(summary.confirmed.session.startsAt) }} · {{ summary.confirmed.registered }} / {{ summary.confirmed.capacity }} places
+        {% elseif summary.state.value == 'to_decide' %}
+            {{ when.people(summary.peopleCount) }} inscrite{{ summary.peopleCount > 1 ? 's' }} sur {{ summary.upcoming|length }} date{{ summary.upcoming|length > 1 ? 's' }}
+        {% elseif summary.state.value == 'waiting' %}
+            {{ summary.upcoming|length }} date{{ summary.upcoming|length > 1 ? 's' }} proposée{{ summary.upcoming|length > 1 ? 's' }}, à partir du {{ when.short(summary.nextDate) }}
+        {% endif %}
+    </span>
+</div>

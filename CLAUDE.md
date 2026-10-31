@@ -79,12 +79,12 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Workshop → plusieurs WorkshopSession → plusieurs Registration.
 - Une personne peut s'inscrire à PLUSIEURS sessions du même atelier (sondage de disponibilités).
 - Statuts de session : ouvert, confirmé, complet, annulé.
-- L'admin voit un tableau dates × inscrits, confirme la date retenue → emails de confirmation (inscrits de cette date) et d'information (autres inscrits).
+- Admin pensé pour une utilisatrice peu à l'aise avec l'informatique : accueil de l'admin = ateliers à venir triés par urgence (« Date à choisir » d'abord) ; page « Suivi de l'atelier » (`WorkshopCrudController::planning`, route `/admin/workshop/{id}/suivi`) avec bandeau de situation, dates en lignes (calendrier, jauge inscrits/places, noms), bouton « Retenir cette date » qui ouvre une fenêtre expliquant qui recevra quel email ; tableau personnes × dates replié en bas. Situation calculée par `Service/Workshop/WorkshopOverview` (états `WorkshopState`). Confirmation → emails de confirmation (inscrits de cette date) et d'information (autres inscrits).
 - Annulation par lien tokenisé (token aléatoire non devinable).
 - Affichage public des inscrits : prénom + initiale du nom UNIQUEMENT si opt-in explicite, sinon seulement le nombre. Jamais d'email ni de téléphone en public.
 - Protection formulaires : CSRF, honeypot (champ `website`), rate limiting (`workshop_registration` : 5 inscriptions valides / 15 min / IP ; les soumissions en erreur ne comptent pas). En test local, vider le compteur avec `php bin/console cache:pool:clear cache.rate_limiter`.
 - Disponibilité d'une date (`SessionAvailability`) : statut ouvert ou confirmé, date future, places restantes (capacité de la date, sinon celle de l'atelier). Le statut « complet » est un choix manuel de l'admin.
-- Confirmation (`SessionConfirmationService`) : une seule fois par date ; un inscrit de la date confirmée ne reçoit jamais aussi l'email d'information ; option « annuler les autres dates ».
+- Confirmation (`SessionConfirmationService`) : une seule fois par date ; un inscrit de la date confirmée ne reçoit jamais aussi l'email d'information ; option « annuler les autres dates » (cochée par défaut dans la fenêtre de confirmation).
 - Annulation : la page GET n'a aucun effet (pré-chargement des liens par les clients mail), l'annulation se fait en POST + CSRF et SUPPRIME l'inscription.
 - Conservation : inscriptions supprimées 90 jours après la date de l'atelier (`app:registrations:purge`, cron quotidien).
 - Emails : un échec d'envoi est journalisé (sans l'adresse) et signalé, sans annuler l'inscription ni la confirmation. Couleurs des emails écrites en dur dans `templates/emails/_layout.html.twig` (seule exception aux tokens : les clients mail ignorent les variables CSS).

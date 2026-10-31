@@ -1,0 +1,16 @@
+{# Formats de dates en clair pour l'admin des ateliers. #}
+
+{# « jeudi 5 novembre 2026 » #}
+{% macro day(date) %}{{ date|format_date(pattern: 'EEEE d MMMM y', locale: 'fr') }}{% endmacro %}
+
+{# « 14 h 00 – 17 h 00 » #}
+{% macro hours(session) %}
+    {{- session.startsAt|format_time(pattern: "H' h 'mm", locale: 'fr') -}}
+    {%- if session.endsAt %} – {{ session.endsAt|format_time(pattern: "H' h 'mm", locale: 'fr') }}{% endif -%}
+{% endmacro %}
+
+{# « jeudi 5 novembre à 14 h 00 » (dans une phrase) #}
+{% macro short(date) %}{{ date|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }} à {{ date|format_time(pattern: "H' h 'mm", locale: 'fr') }}{% endmacro %}
+
+{# « 3 personnes », « 1 personne », « personne » #}
+{% macro people(count) %}{{ count == 0 ? 'personne' : count ~ ' personne' ~ (count > 1 ? 's') }}{% endmacro %}

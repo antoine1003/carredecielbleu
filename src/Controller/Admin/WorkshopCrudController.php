@@ -11,6 +11,7 @@ use App\Entity\WorkshopSession;
 use App\Form\ResponsiveImageType;
 use App\Repository\RegistrationRepository;
 use App\Service\Workshop\RegistrationCsvExporter;
+use App\Service\Workshop\WorkshopOverview;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
@@ -40,13 +41,16 @@ final class WorkshopCrudController extends AbstractCrudController
         return Workshop::class;
     }
 
-    /** Tableau dates × inscrits, avec confirmation de la date retenue. */
-    #[AdminRoute('/{id}/planning', name: 'planning', options: ['methods' => ['GET']])]
-    public function planning(#[MapEntity(id: 'id')] Workshop $workshop, RegistrationRepository $registrations): Response
+    /**
+     * Suivi d'un atelier : où en est-on, les dates en un coup d'œil (inscrits, places),
+     * confirmation de la date retenue, et tableau détaillé personnes × dates.
+     */
+    #[AdminRoute('/{id}/suivi', name: 'planning', options: ['methods' => ['GET']])]
+    public function planning(#[MapEntity(id: 'id')] Workshop $workshop, RegistrationRepository $registrations, WorkshopOverview $overview): Response
     {
         $sessions = $workshop->getSessions()->toArray();
 
-        // Une ligne par personne (regroupée par email), une colonne par date.
+        // Tableau détaillé : une ligne par personne (regroupée par email), une colonne par date.
         $people = [];
         foreach ($registrations->findForWorkshop($workshop) as $registration) {
             $email = (string) $registration->getEmail();
@@ -56,6 +60,7 @@ final class WorkshopCrudController extends AbstractCrudController
 
         return $this->render('admin/workshop/planning.html.twig', [
             'workshop' => $workshop,
+            'summary' => $overview->of($workshop),
             'sessions' => $sessions,
             'people' => array_values($people),
         ]);
@@ -80,29 +85,30 @@ final class WorkshopCrudController extends AbstractCrudController
             ->setPageTitle(Crud::PAGE_EDIT, static fn (Workshop $w): string => (string) $w->getTitle())
             ->setPageTitle(Crud::PAGE_DETAIL, static fn (Workshop $w): string => (string) $w->getTitle())
             ->setDefaultSort(['title' => 'ASC'])
-            ->setHelp(Crud::PAGE_INDEX, 'Un atelier est proposé à plusieurs dates. Ouvrez son tableau des inscrits pour confirmer la date retenue.');
+            ->setHelp(Crud::PAGE_INDEX, 'Cliquez sur un atelier pour voir où il en est : dates proposées, inscrits, et choix de la date retenue.');
     }
 
     public function configureActions(Actions $actions): Actions
     {
-        $planning = Action::new('planning', 'Tableau des inscrits', 'fa fa-table-cells')
+        $planning = Action::new('planning', 'Suivi de l\'atelier', 'fa fa-calendar-check')
             ->linkToCrudAction('planning');
 
+        // Le suivi remplace la page « détail » : c'est là qu'on voit tout l'atelier.
         return $actions
             ->add(Crud::PAGE_INDEX, $planning)
             ->add(Crud::PAGE_EDIT, $planning)
-            ->add(Crud::PAGE_DETAIL, $planning)
-            ->add(Crud::PAGE_INDEX, Action::DETAIL);
+            ->reorder(Crud::PAGE_INDEX, ['planning', Action::EDIT, Action::DELETE]);
     }
 
     public function configureFields(string $pageName): iterable
     {
-        // L'ordre des champs fixe aussi les colonnes de la liste : titre, publié, places, dates.
+        // L'ordre des champs fixe aussi les colonnes de la liste : titre (lien vers le suivi), publié, situation.
 
         // ---------- Onglet 1 : textes et publication ----------
         yield FormField::addTab('Présentation', 'fa fa-palette');
         yield FormField::addColumn('col-12 col-xl-8');
-        yield TextField::new('title', 'Titre');
+        yield TextField::new('title', 'Titre')
+            ->setTemplatePath('admin/workshop/_index_title.html.twig');
         yield TextareaField::new('summary', 'Accroche')->hideOnIndex()
             ->setNumOfRows(2)
             ->setHelp('Une ou deux phrases affichées dans la liste des ateliers.');
@@ -122,12 +128,12 @@ final class WorkshopCrudController extends AbstractCrudController
             ->setHelp('Pour information uniquement : aucun paiement sur le site.');
         yield TextField::new('defaultLocation', 'Lieu par défaut')->hideOnIndex()->setColumns('col-12 col-md-6')
             ->setHelp('Utilisé pour toutes les dates qui n\'ont pas de lieu propre.');
-        yield IntegerField::new('defaultCapacity', 'Places par date')->setColumns('col-12 col-md-6')
+        yield IntegerField::new('defaultCapacity', 'Places par date')->hideOnIndex()->setColumns('col-12 col-md-6')
             ->setHelp('Valeur par défaut, modifiable pour chaque date.');
 
-        // Nombre de dates (colonne de la liste), adossé à l'id pour ne pas déclarer « sessions » deux fois.
-        yield IntegerField::new('id', 'Dates')->onlyOnIndex()->setSortable(false)
-            ->formatValue(static fn ($value, Workshop $workshop): string => (string) $workshop->getSessions()->count());
+        // Situation de l'atelier (colonne de la liste) : date retenue, date à choisir, inscrits…
+        yield IntegerField::new('id', 'Situation')->onlyOnIndex()->setSortable(false)
+            ->setTemplatePath('admin/workshop/_index_status.html.twig');
 
         // ---------- Onglet 3 : photos et vidéo ----------
         yield FormField::addTab('Photos et vidéo', 'fa fa-images');

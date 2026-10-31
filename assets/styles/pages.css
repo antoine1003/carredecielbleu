@@ -372,78 +372,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 600ms var(--ease);
-}
-
-/* Reflet de lumière qui traverse le verre au survol */
-.gallery__zoom::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        115deg,
-        transparent 30%,
-        color-mix(in srgb, var(--palette-blanc) 45%, transparent) 48%,
-        color-mix(in srgb, var(--palette-ambre) 25%, transparent) 54%,
-        transparent 70%
-    );
-    transform: translateX(-120%);
-    pointer-events: none;
-}
-
-.gallery__zoom-badge {
-    position: absolute;
-    right: var(--space-4);
-    bottom: var(--space-4);
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 50%;
-    background: var(--color-surface);
-    color: var(--color-action-bg);
-    opacity: 0;
-    transform: scale(0.85);
-    transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
-}
-
-.gallery__zoom-badge svg {
-    width: 1.35rem;
-    height: 1.35rem;
-}
-
-@media (hover: hover) {
-    .gallery__zoom:hover img {
-        transform: scale(1.05);
-    }
-
-    .gallery__zoom:hover::after {
-        transform: translateX(120%);
-        transition: transform 900ms var(--ease);
-    }
-
-    .gallery__zoom:hover .gallery__zoom-badge {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* Au clavier, la loupe apparaît aussi */
-.gallery__zoom:focus-visible .gallery__zoom-badge {
-    opacity: 1;
-    transform: scale(1);
 }
 
 .gallery__zoom:focus-visible {
     outline-offset: -6px;
-}
-
-/* Sur écran tactile, la loupe reste visible pour signaler qu'on peut agrandir */
-@media (hover: none) {
-    .gallery__zoom-badge {
-        opacity: 0.9;
-        transform: none;
-    }
 }
 
 .gallery__arrow {
@@ -664,35 +596,5 @@
 @media (prefers-reduced-motion: reduce) {
     .gallery__track {
         scroll-behavior: auto;
-    }
-
-    /* Sans mouvement : la photo s'éclaire et une lueur dorée apparaît en fondu */
-    .gallery__zoom::after {
-        transform: none;
-        opacity: 0;
-        background: radial-gradient(
-            circle at 30% 20%,
-            color-mix(in srgb, var(--palette-blanc) 35%, transparent),
-            color-mix(in srgb, var(--palette-ambre) 15%, transparent) 45%,
-            transparent 75%
-        );
-        transition: opacity 300ms ease;
-    }
-
-    .gallery__zoom img {
-        transition: filter 300ms ease;
-    }
-
-    .gallery__zoom:hover img {
-        transform: none;
-        filter: brightness(1.06) saturate(1.12);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) and (hover: hover) {
-    .gallery__zoom:hover::after {
-        transform: none;
-        opacity: 1;
-        transition: opacity 300ms ease;
     }
 }

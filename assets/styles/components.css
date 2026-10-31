@@ -187,7 +187,29 @@
 }
 
 .product-card__media {
+    display: block;
     margin-bottom: var(--space-2);
+}
+
+/* Léger zoom de l'image au survol de la carte */
+.product-card__media > img,
+.product-card__media > svg {
+    transition: transform 500ms var(--ease);
+}
+
+@media (hover: hover) {
+    .product-card:hover .product-card__media > img,
+    .product-card:hover .product-card__media > svg {
+        transform: scale(1.06);
+    }
+}
+
+/* Animations réduites : le zoom reste, mais sans mouvement progressif */
+@media (prefers-reduced-motion: reduce) {
+    .product-card__media > img,
+    .product-card__media > svg {
+        transition: none;
+    }
 }
 
 .product-card__title {

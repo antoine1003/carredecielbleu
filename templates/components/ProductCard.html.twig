@@ -19,7 +19,8 @@
     lazy = true
 %}
 <article {{ attributes.defaults({class: 'product-card'}) }}>
-    <div class="product-card__media lancet">
+    {# Image cliquable vers la fiche ; masquée aux lecteurs d'écran et hors tabulation (le titre porte déjà le lien) #}
+    <a class="product-card__media lancet" href="{{ url }}" tabindex="-1" aria-hidden="true">
         {% if image %}
             <img src="{{ image.src }}"
                  {% if image.srcset is defined %}srcset="{{ image.srcset }}" sizes="{{ image.sizes ?? '(min-width: 74rem) 18rem, (min-width: 48rem) 33vw, 100vw' }}"{% endif %}
@@ -29,7 +30,7 @@
         {% else %}
             <twig:GlassArt motif="{{ motif }}" />
         {% endif %}
-    </div>
+    </a>
     <h{{ headingLevel }} class="product-card__title"><a href="{{ url }}">{{ name }}</a></h{{ headingLevel }}>
     <p class="product-card__meta">
         {% if price is not null %}

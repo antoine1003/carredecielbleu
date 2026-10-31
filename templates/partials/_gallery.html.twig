@@ -13,7 +13,7 @@
 {% set count = images|length %}
 
 {% if count > 0 %}
-    <div class="gallery" data-controller="gallery" data-gallery-count-value="{{ count }}">
+    <div class="gallery" data-controller="gallery" data-gallery-count-value="{{ count }}" style="--gallery-ratio: {{ images[0].width }} / {{ images[0].height }}">
         <div class="gallery__viewport">
             <ul class="gallery__track" data-gallery-target="track" data-action="scroll->gallery#onScroll"
                 tabindex="0" aria-label="Photos de {{ label }}{{ count > 1 ? ', faire défiler pour en voir d\'autres' }}">

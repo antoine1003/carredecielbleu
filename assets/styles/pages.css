@@ -474,12 +474,12 @@
     margin: 0;
     padding: 0;
     border: 0;
-    background: color-mix(in srgb, var(--palette-encre) 94%, transparent);
+    background: var(--color-overlay);
     color: var(--palette-blanc);
 }
 
 .lightbox::backdrop {
-    background: color-mix(in srgb, var(--palette-encre) 60%, transparent);
+    background: transparent;
 }
 
 .lightbox[open] {
@@ -604,9 +604,20 @@
     max-width: 36rem;
 }
 
-/* Photos d'atelier souvent prises à l'horizontale : arche plus large que haute */
+/* Photos d'atelier : photo entière (ni arche ni recadrage), quel que soit son format */
+.workshop__gallery .gallery__track {
+    border-radius: var(--radius-md);
+}
+
 .workshop__gallery .gallery__zoom {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: var(--gallery-ratio, 4 / 3);
+    max-height: 75vh;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--palette-ciel) 25%, var(--color-surface));
+}
+
+.workshop__gallery .gallery__zoom img {
+    object-fit: contain;
 }
 
 .video-block {

@@ -119,3 +119,8 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Chaque date est une tuile cliquable (`date-tile`, macro `date_tile` de `templates/workshop/_macros.html.twig`) : mini-calendrier (mois, jour, jour de la semaine) qui passe à l'encre une fois choisie, horaire et lieu, places en pastilles (une par place, pleine si prise ; texte seul au-delà de 12 places), inscrits (prénom + initiale si accord), mention « Date confirmée », coche ronde. Date complète : tuile en pointillés, non cliquable.
 - La vraie case à cocher reste dans la tuile (invisible, couvre toute la tuile) : clavier, lecteurs d'écran et envoi sans JavaScript inchangés. Erreur « Cochez au moins une date » reliée au groupe (`aria-describedby`).
 - Vérifié : sélection au clic, page atelier à 1280 et 375 px sans débordement, message d'erreur, styleguide (les trois états).
+
+## 2026-10-31 — Photos entières et visionneuse noire
+
+- Photos d'atelier : plus d'arche ni de recadrage (`object-fit: contain`), cadre aux coins arrondis qui prend les proportions de la première photo (`--gallery-ratio`, 75 % de la hauteur d'écran au plus) ; une photo d'un autre format s'affiche entière avec un fond clair. Les produits gardent l'arche.
+- Visionneuse plein écran (produits et ateliers) : fond noir légèrement transparent (`--color-overlay`, nouvelle teinte `--palette-noir`) au lieu du bleu encre.

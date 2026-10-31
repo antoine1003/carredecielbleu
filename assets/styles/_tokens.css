@@ -20,6 +20,7 @@
     --palette-ciel: #9FC8DD;         /* verre clair, illustrations */
     --palette-brume: #EAF1F3;        /* fond général */
     --palette-blanc: #FFFFFF;
+    --palette-noir: #000000;         /* fond de la visionneuse photo */
     --palette-gris-bleu: #3F5466;    /* texte secondaire */
     --palette-galet: #6B8597;        /* bordures de champs */
     --palette-trait: #9DB1BF;        /* séparateurs décoratifs */
@@ -42,6 +43,9 @@
 
     --color-action-bg: var(--palette-encre);
     --color-action-text: var(--palette-blanc);
+
+    /* Visionneuse photo plein écran : noir légèrement transparent */
+    --color-overlay: color-mix(in srgb, var(--palette-noir) 82%, transparent);
     --color-action-bg-hover: var(--palette-estuaire);
 
     --color-border: var(--palette-trait);

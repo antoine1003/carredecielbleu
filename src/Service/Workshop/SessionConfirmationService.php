@@ -15,7 +15,9 @@ use Psr\Clock\ClockInterface;
  * - la date passe en « confirmée » ;
  * - ses inscrits reçoivent un email de confirmation ;
  * - les inscrits des autres dates (et seulement d'elles) reçoivent un email d'information ;
- * - en option, les autres dates à venir sont annulées.
+ * - en option, les autres dates à venir sont annulées ;
+ * - les inscrits de la date retenue sont retirés des autres dates à venir non confirmées
+ *   (leur place est prise : cela libère des places et évite de garder des données inutiles).
  */
 final readonly class SessionConfirmationService
 {
@@ -47,24 +49,41 @@ final readonly class SessionConfirmationService
 
         $confirmedEmails = [];
         foreach ($session->getRegistrations() as $registration) {
-            $confirmedEmails[(string) $registration->getEmail()] = true;
+            $confirmedEmails[mb_strtolower((string) $registration->getEmail())] = true;
         }
 
-        // Inscrits des autres dates à venir non annulées, une seule fois par adresse.
+        // Inscrits de la date retenue : retrait de leurs autres disponibilités (dates à venir non confirmées).
+        $removedByEmail = [];
+        foreach ($workshop->getSessions() as $other) {
+            if ($other === $session || SessionStatus::Confirmed === $other->getStatus() || $other->getStartsAt() <= $now) {
+                continue;
+            }
+            foreach ($other->getRegistrations()->toArray() as $registration) {
+                $email = mb_strtolower((string) $registration->getEmail());
+                if (isset($confirmedEmails[$email])) {
+                    $other->removeRegistration($registration);
+                    $this->entityManager->remove($registration);
+                    $removedByEmail[$email] = ($removedByEmail[$email] ?? 0) + 1;
+                }
+            }
+        }
+
+        // Inscrits des autres dates à venir, ni annulées ni déjà confirmées (ceux-là ont leur place),
+        // une seule fois par adresse.
         /** @var array<string, Registration> $others */
         $others = [];
         $cancelledSessions = 0;
         foreach ($workshop->getSessions() as $other) {
-            if ($other === $session || SessionStatus::Cancelled === $other->getStatus() || $other->getStartsAt() <= $now) {
+            if ($other === $session || \in_array($other->getStatus(), [SessionStatus::Cancelled, SessionStatus::Confirmed], true) || $other->getStartsAt() <= $now) {
                 continue;
             }
             foreach ($other->getRegistrations() as $registration) {
-                $email = (string) $registration->getEmail();
+                $email = mb_strtolower((string) $registration->getEmail());
                 if (!isset($confirmedEmails[$email])) {
                     $others[$email] ??= $registration;
                 }
             }
-            if ($cancelOtherSessions && SessionStatus::Confirmed !== $other->getStatus()) {
+            if ($cancelOtherSessions) {
                 $other->setStatus(SessionStatus::Cancelled);
                 ++$cancelledSessions;
             }
@@ -74,7 +93,8 @@ final readonly class SessionConfirmationService
 
         $sent = $failed = 0;
         foreach ($session->getRegistrations() as $registration) {
-            $this->mailer->sendSessionConfirmed($registration) ? ++$sent : ++$failed;
+            $otherDatesRemoved = isset($removedByEmail[mb_strtolower((string) $registration->getEmail())]);
+            $this->mailer->sendSessionConfirmed($registration, $otherDatesRemoved) ? ++$sent : ++$failed;
         }
         foreach ($others as $registration) {
             $this->mailer->sendOtherSessionChosen($registration, $session, $cancelOtherSessions) ? ++$sent : ++$failed;
@@ -84,6 +104,7 @@ final readonly class SessionConfirmationService
             confirmedCount: $session->getRegistrations()->count(),
             informedCount: \count($others),
             cancelledSessions: $cancelledSessions,
+            removedRegistrations: array_sum($removedByEmail),
             emailsSent: $sent,
             emailsFailed: $failed,
         );

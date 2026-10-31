@@ -118,12 +118,13 @@ final readonly class WorkshopOverview
         $capacity = $session->getEffectiveCapacity();
         $canConfirm = $isUpcoming && \in_array($session->getStatus(), [SessionStatus::Open, SessionStatus::Full], true);
 
-        // Personnes des autres dates qui recevraient l'email d'information si l'on retenait celle-ci.
+        // Personnes des autres dates (ni annulées ni déjà confirmées) qui recevraient l'email
+        // d'information si l'on retenait celle-ci.
         $mine = $emailsBySession[(int) $session->getId()] ?? $this->emails($session);
         $others = [];
-        foreach ($emailsBySession as $id => $emails) {
-            if ($id !== $session->getId()) {
-                $others = array_merge($others, $emails);
+        foreach ($session->getWorkshop()?->getSessions() ?? [] as $other) {
+            if ($other !== $session && SessionStatus::Confirmed !== $other->getStatus() && isset($emailsBySession[(int) $other->getId()])) {
+                $others = array_merge($others, $emailsBySession[(int) $other->getId()]);
             }
         }
 
@@ -135,7 +136,37 @@ final readonly class WorkshopOverview
             canConfirm: $canConfirm,
             othersToNotify: \count(array_diff(array_unique($others), $mine)),
             depositsPaid: \count(array_filter($session->getRegistrations()->toArray(), static fn (Registration $r): bool => $r->isDepositPaid())),
+            registrationsToRemove: $canConfirm ? array_sum($removal = $this->otherDatesOf($session, $mine)) : 0,
+            peopleWithOtherDates: $canConfirm ? \count($removal) : 0,
         );
+    }
+
+    /**
+     * Inscriptions des personnes de cette date à d'autres dates à venir non confirmées
+     * (retirées si l'on retient cette date, voir SessionConfirmationService).
+     *
+     * @param list<string> $emails adresses des inscrits de cette date
+     *
+     * @return array<string, int> nombre d'inscriptions retirées par adresse
+     */
+    private function otherDatesOf(WorkshopSession $session, array $emails): array
+    {
+        $mine = array_flip($emails);
+        $now = $this->clock->now();
+        $removal = [];
+        foreach ($session->getWorkshop()?->getSessions() ?? [] as $other) {
+            if ($other === $session || SessionStatus::Confirmed === $other->getStatus() || $other->getStartsAt() <= $now) {
+                continue;
+            }
+            foreach ($other->getRegistrations() as $registration) {
+                $email = mb_strtolower((string) $registration->getEmail());
+                if (isset($mine[$email])) {
+                    $removal[$email] = ($removal[$email] ?? 0) + 1;
+                }
+            }
+        }
+
+        return $removal;
     }
 
     /** @return list<string> */

@@ -146,3 +146,10 @@ Journal des décisions prises pendant le développement. Les règles durables so
 
 - Messages de réussite du site (inscription enregistrée, annulation faite, messages flash « success ») : alerte verte `notice--success` (fond vert pâle, pastille cochée), couleurs `--color-success*` dans les tokens. Après inscription, le message rappelle la suite (email de confirmation, lien d'acompte si l'atelier en demande un).
 - Quand l'artisane clique « Acompte reçu » dans le suivi, la personne reçoit l'email « Votre place est réservée » (inscription définitivement validée, date limite de remboursement, lien d'annulation). Rien n'est envoyé si l'acompte est saisi à la main dans la fiche d'inscription, ni quand on décoche.
+
+## 2026-10-31 — Disponibilités multiples après confirmation
+
+- Quand une date est retenue, les personnes inscrites à cette date (même adresse email) sont retirées des autres dates à venir non confirmées de l'atelier (ouvertes, complètes ou annulées) : places libérées, plus de doublon si une autre date est confirmée plus tard, pas de données inutiles. Automatique, sans case à cocher. Leur email de confirmation le mentionne ; la fenêtre « Retenir cette date » annonce le nombre d'inscriptions retirées ; le message de résultat aussi.
+- Les personnes qui n'étaient pas disponibles à la date retenue gardent leurs autres inscriptions (email « la date est fixée » inchangé).
+- Correction au passage : les inscrits d'une date déjà confirmée ne reçoivent plus l'email d'information si une autre date est confirmée (cas impossible depuis le suivi actuel, qui ne propose plus « Retenir » une fois une date retenue ; vérifié par relecture et PHPStan seulement).
+- Vérifié sur un atelier de test (supprimé ensuite) : décompte annoncé dans la fenêtre, inscriptions retirées en base, emails (mention de retrait pour les confirmés, information pour les autres), message de résultat.

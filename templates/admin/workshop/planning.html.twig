@@ -193,6 +193,9 @@
                         <p>Voici ce qui va se passer :</p>
                         <ul>
                             <li><strong>{{ when.people(outerScope.s.registered)|capitalize }}</strong> inscrite{{ outerScope.s.registered > 1 ? 's' }} à cette date {{ outerScope.s.registered > 1 ? 'recevront' : 'recevra' }} un email : l'atelier est confirmé.{% if deposit_policy().isRequired(outerScope.workshop) %} Il contiendra le lien pour payer l'acompte de {{ (outerScope.workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}{% if not outerScope.workshop.depositUrl %} <strong class="text-danger">(lien SumUp pas encore renseigné sur l'atelier)</strong>{% endif %}.{% endif %}</li>
+                            {% if outerScope.s.registrationsToRemove > 0 %}
+                                <li>{{ outerScope.s.peopleWithOtherDates > 1 ? outerScope.s.peopleWithOtherDates ~ ' de ces personnes étaient' : '1 de ces personnes était' }} aussi inscrite{{ outerScope.s.peopleWithOtherDates > 1 ? 's' }} à d'autres dates : {{ outerScope.s.registrationsToRemove > 1 ? 'ces ' ~ outerScope.s.registrationsToRemove ~ ' inscriptions seront retirées' : 'cette inscription sera retirée' }}, ce qui libère de la place.</li>
+                            {% endif %}
                             {% if outerScope.s.othersToNotify > 0 %}
                                 <li><strong>{{ when.people(outerScope.s.othersToNotify)|capitalize }}</strong> inscrite{{ outerScope.s.othersToNotify > 1 ? 's' }} seulement à d'autres dates {{ outerScope.s.othersToNotify > 1 ? 'recevront' : 'recevra' }} un email pour {{ outerScope.s.othersToNotify > 1 ? 'les' : 'la' }} prévenir.</li>
                             {% endif %}

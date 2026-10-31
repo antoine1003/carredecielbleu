@@ -23,6 +23,10 @@ final readonly class SessionSummary
         public int $othersToNotify,
         /** Acomptes reçus parmi les inscrits de cette date. */
         public int $depositsPaid = 0,
+        /** Inscriptions de ces personnes à d'autres dates, retirées si l'on retient celle-ci. */
+        public int $registrationsToRemove = 0,
+        /** Personnes concernées par ce retrait. */
+        public int $peopleWithOtherDates = 0,
     ) {
     }
 }

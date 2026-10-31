@@ -2,6 +2,8 @@
 Bonjour {{ firstName }},
 
 Bonne nouvelle : l'atelier « {{ workshop.title }} » aura bien lieu à la date que vous aviez choisie :
+{% if otherDatesRemoved %}(Vos disponibilités aux autres dates ont été retirées, puisque votre place est prise à celle-ci.)
+{% endif %}
 
 {{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}{% if session.effectiveLocation %}
 

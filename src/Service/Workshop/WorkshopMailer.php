@@ -60,8 +60,12 @@ final readonly class WorkshopMailer
         );
     }
 
-    /** La date à laquelle la personne est inscrite est confirmée. */
-    public function sendSessionConfirmed(Registration $registration): bool
+    /**
+     * La date à laquelle la personne est inscrite est confirmée.
+     *
+     * @param bool $otherDatesRemoved ses inscriptions à d'autres dates de l'atelier viennent d'être retirées
+     */
+    public function sendSessionConfirmed(Registration $registration, bool $otherDatesRemoved = false): bool
     {
         $session = $registration->getSession();
 
@@ -71,6 +75,7 @@ final readonly class WorkshopMailer
             'emails/workshop/session_confirmed',
             [
                 'firstName' => $registration->getFirstName(),
+                'otherDatesRemoved' => $otherDatesRemoved,
                 'session' => $session,
                 'workshop' => $session?->getWorkshop(),
                 'cancelUrl' => $this->cancelUrl($registration),

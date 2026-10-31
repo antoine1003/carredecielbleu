@@ -10,6 +10,8 @@ final readonly class ConfirmationResult
         public int $confirmedCount,
         public int $informedCount,
         public int $cancelledSessions,
+        /** Inscriptions des personnes confirmées à d'autres dates, retirées. */
+        public int $removedRegistrations,
         public int $emailsSent,
         public int $emailsFailed,
     ) {
@@ -24,6 +26,9 @@ final readonly class ConfirmationResult
         );
         if ($this->cancelledSessions > 0) {
             $text .= \sprintf(', %d autre(s) date(s) annulée(s)', $this->cancelledSessions);
+        }
+        if ($this->removedRegistrations > 0) {
+            $text .= \sprintf(', %d inscription(s) des participants à d\'autres dates retirée(s)', $this->removedRegistrations);
         }
 
         return $text.'.';

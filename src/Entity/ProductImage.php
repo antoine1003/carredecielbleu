@@ -7,10 +7,12 @@ namespace App\Entity;
 use App\Repository\ProductImageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * Photo d'un produit, uploadée dans l'admin (redimensionnement WebP : phase admin).
+ * Photo d'un produit, envoyée depuis l'admin et convertie en WebP en plusieurs largeurs.
  * Les fichiers vivent dans public/uploads/products/ ; seul le nom de base est stocké.
  */
 #[ORM\Entity(repositoryClass: ProductImageRepository::class)]
@@ -30,7 +32,7 @@ class ProductImage
     private ?string $filename = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Décrivez la photo pour les personnes malvoyantes et le référencement.')]
+    /** Texte alternatif ; vide à l'envoi = nom du produit (ProductImageUploadSubscriber). */
     #[Assert\Length(max: 255)]
     private ?string $alt = null;
 
@@ -47,6 +49,39 @@ class ProductImage
 
     #[ORM\Column]
     private int $position = 0;
+
+    /**
+     * Fichier envoyé depuis l'admin, non enregistré en base : converti en WebP par
+     * ProductImageProcessor avant l'enregistrement (ProductImageUploadSubscriber).
+     */
+    #[Assert\Image(
+        maxSize: '10M',
+        mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+        mimeTypesMessage: 'Envoyez une photo JPEG, PNG ou WebP.',
+        maxSizeMessage: 'La photo dépasse 10 Mo.',
+    )]
+    private ?File $file = null;
+
+    /** Une nouvelle photo doit avoir un fichier. */
+    #[Assert\Callback]
+    public function validateFile(ExecutionContextInterface $context): void
+    {
+        if (null === $this->filename && null === $this->file) {
+            $context->buildViolation('Choisissez une photo à envoyer.')->atPath('file')->addViolation();
+        }
+    }
+
+    public function getFile(): ?File
+    {
+        return $this->file;
+    }
+
+    public function setFile(?File $file): static
+    {
+        $this->file = $file;
+
+        return $this;
+    }
 
     public function getId(): ?int
     {

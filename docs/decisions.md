@@ -76,3 +76,10 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Serveur : preuve signée (clé `ALTCHA_HMAC_KEY`), valable 30 min, à usage unique (empreinte en cache jusqu'à expiration).
 - Vérifié : inscription réelle par le navigateur acceptée ; service testé directement (preuve valide acceptée ; rejouée, trafiquée, signée par une autre clé, absente ou sans clé serveur refusées). Les tests curl de bout en bout ont buté sur le CSRF (cookies de curl sous Git Bash), pas sur le captcha.
 - Correction au passage : texte des champs blanc sur blanc dans le bandeau newsletter (couleur héritée du bloc sombre).
+
+## 2026-10-31 — Photos produits et galerie
+
+- Admin : onglet « Photos » du produit (collection de photos, ordre = ordre affiché, texte alternatif vide = nom du produit). Validation JPEG/PNG/WebP, 10 Mo, 50 mégapixels maximum ; conversion GD en WebP (480, 960, 1600 px, sans agrandissement, orientation EXIF corrigée) sous un nom aléatoire ; fichiers supprimés quand la photo est retirée ou remplacée. Pas de dépendance ajoutée (pas de VichUploader ni LiipImagine).
+- Fiche produit : ruban à défilement natif (scroll-snap : glisser au doigt, flèches, miniatures, clavier), reflet de lumière et loupe au survol, visionneuse plein écran en `<dialog>` natif (Échap, clic sur le fond, flèches du clavier). Sans JavaScript, chaque photo reste un lien vers sa grande version. Animations coupées avec `prefers-reduced-motion`.
+- Mobile : les photos prennent toute la largeur ; l'illustration provisoire (produit sans photo) garde sa largeur réduite.
+- Vérifié : upload de 3 photos par le vrai formulaire (lignes en base, 8 fichiers WebP), navigation flèches/miniatures/compteur, visionneuse (ouverture sur la bonne photo, clavier, retour du focus sur la photo regardée), 1280 px et 375 px sans débordement, produit sans photo inchangé.

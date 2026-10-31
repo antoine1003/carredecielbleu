@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Entity\Product;
 use App\Entity\ProductVariant;
 use App\Enum\SyncStatus;
+use App\Form\ProductImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -15,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
@@ -104,7 +106,21 @@ final class ProductCrudController extends AbstractCrudController
             ->setUnlockConfirmationMessage('Changer l\'adresse casse les liens déjà partagés. Continuer ?')
             ->setHelp('Partie de l\'adresse après /boutique/.');
 
-        // ---------- Onglet 2 : données importées, en lecture seule ----------
+        // ---------- Onglet 2 : photos (plusieurs par produit) ----------
+        yield FormField::addTab('Photos', 'fa fa-images')
+            ->setHelp('La première photo est la photo principale (liste et partage sur les réseaux). Ajoutez-en autant que vous voulez : elles défilent sur la fiche produit.');
+        yield CollectionField::new('images', false)
+            ->onlyOnForms()
+            ->setEntryType(ProductImageType::class)
+            ->setEntryIsComplex()
+            ->renderExpanded()
+            ->allowAdd()
+            ->allowDelete()
+            ->setColumns('col-12')
+            ->setFormTypeOption('by_reference', false)
+            ->setFormTypeOption('entry_options', ['label' => false]);
+
+        // ---------- Onglet 3 : données importées, en lecture seule ----------
         yield FormField::addTab('Données SumUp', 'fa fa-cash-register')
             ->setHelp('Remplacées à chaque import : modifiez-les dans SumUp.');
 

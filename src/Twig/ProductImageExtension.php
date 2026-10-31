@@ -37,7 +37,7 @@ final class ProductImageExtension extends AbstractExtension
     }
 
     /**
-     * @return array{src: string, srcset: string, sizes: string, width: int, height: int, alt: string}|null
+     * @return array{src: string, large: string, srcset: string, sizes: string, width: int, height: int, alt: string}|null
      */
     public function productImage(?ProductImage $image, string $sizes = '(min-width: 74rem) 18rem, (min-width: 48rem) 33vw, 100vw'): ?array
     {
@@ -51,6 +51,8 @@ final class ProductImageExtension extends AbstractExtension
 
         return [
             'src' => $url($widths[(int) floor((\count($widths) - 1) / 2)]),
+            // Plus grande version (visionneuse plein écran, lien sans JavaScript).
+            'large' => $url($widths[\count($widths) - 1]),
             'srcset' => implode(', ', array_map(static fn (int $w): string => $url($w).' '.$w.'w', $widths)),
             'sizes' => $sizes,
             'width' => $image->getWidth(),

@@ -71,7 +71,7 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Variantes SumUp : entité `ProductVariant` (clé `sumupVariantId`, prix et stock propres). Dans le CSV, une ligne parente (Item id sans Variant id) est suivie de lignes sans nom portant `Variations` + `Variant id`. Prix public : « à partir de ».
 - Stock : `Track inventory = No` → stock non suivi = disponible (« Sur commande »). Stock suivi à 0 → comportement « épuisé » réglable (global dans les réglages, surchargeable par produit : masquer / afficher « Épuisé » / afficher « Sur commande »). Seuls les produits visibles sont publics.
 - `Display item in Online Store?` : valeur initiale de la visibilité à la création uniquement, jamais réécrite ensuite.
-- Images : uploadées à la main dans l'admin (les URLs d'images SumUp du CSV sont ignorées).
+- Images : uploadées à la main dans l'admin (les URLs d'images SumUp du CSV sont ignorées). Onglet « Photos » du produit, plusieurs photos, la première est la principale ; `Service/Image/ProductImageProcessor` (GD) les convertit en WebP 480/960/1600 px sous un nom aléatoire dans `public/uploads/products/`, fichiers supprimés avec la photo. Fiche produit : galerie défilante + visionneuse `<dialog>` (`templates/shop/_gallery.html.twig`, contrôleur Stimulus `gallery`).
 - Bouton d'achat : lien externe vers `purchaseUrl` (saisi à la main, absent du CSV), `target="_blank" rel="noopener noreferrer"`, libellé « Acheter sur SumUp ». Sans `purchaseUrl` → bouton « Me contacter ».
 
 ### Ateliers

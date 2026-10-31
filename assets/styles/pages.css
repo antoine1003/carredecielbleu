@@ -91,12 +91,14 @@
 }
 
 .product__gallery {
-    flex: 1 1 18rem;
-    max-width: 34rem;
+    flex: 1 1 24rem;
+    min-width: 0;
+    max-width: 36rem;
 }
 
 @media (max-width: 47.99rem) {
-    .product__gallery {
+    /* L'illustration provisoire reste étroite ; les vraies photos prennent toute la largeur */
+    .product__gallery:not(:has(.gallery)) {
         max-width: min(20rem, 78%);
         margin-inline: auto;
     }
@@ -118,23 +120,8 @@
     width: 100%;
 }
 
-.product__thumbs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
-    gap: var(--space-3);
-    margin: var(--space-4) 0 0;
-    padding: 0;
-    list-style: none;
-}
-
-.product__thumbs img {
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-}
-
 .product__info {
-    flex: 999 1 22rem;
+    flex: 1.2 1 22rem;
     min-width: 0;
     --stack-gap: var(--space-5);
 }
@@ -334,4 +321,356 @@
     width: 1px;
     height: 1px;
     overflow: hidden;
+}
+
+/* ---------- Galerie de la fiche produit ---------- */
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.gallery__viewport {
+    position: relative;
+}
+
+/* Ruban à défilement : glisser au doigt sur mobile, flèches et miniatures ailleurs */
+.gallery__track {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    border-radius: var(--radius-arch);
+}
+
+.gallery__track::-webkit-scrollbar {
+    display: none;
+}
+
+.gallery__track:focus-visible {
+    outline-offset: 4px;
+}
+
+.gallery__slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+
+.gallery__zoom {
+    position: relative;
+    display: block;
+    width: 100%;
+    cursor: zoom-in;
+}
+
+.gallery__zoom img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 600ms var(--ease);
+}
+
+/* Reflet de lumière qui traverse le verre au survol */
+.gallery__zoom::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        color-mix(in srgb, var(--palette-blanc) 45%, transparent) 48%,
+        color-mix(in srgb, var(--palette-ambre) 25%, transparent) 54%,
+        transparent 70%
+    );
+    transform: translateX(-120%);
+    pointer-events: none;
+}
+
+.gallery__zoom-badge {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-action-bg);
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
+}
+
+.gallery__zoom-badge svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+@media (hover: hover) {
+    .gallery__zoom:hover img {
+        transform: scale(1.05);
+    }
+
+    .gallery__zoom:hover::after {
+        transform: translateX(120%);
+        transition: transform 900ms var(--ease);
+    }
+
+    .gallery__zoom:hover .gallery__zoom-badge {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Au clavier, la loupe apparaît aussi */
+.gallery__zoom:focus-visible .gallery__zoom-badge {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.gallery__zoom:focus-visible {
+    outline-offset: -6px;
+}
+
+/* Sur écran tactile, la loupe reste visible pour signaler qu'on peut agrandir */
+@media (hover: none) {
+    .gallery__zoom-badge {
+        opacity: 0.9;
+        transform: none;
+    }
+}
+
+.gallery__arrow {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-top: -1.375rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-action-bg);
+    cursor: pointer;
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--palette-encre) 20%, transparent);
+    transition: opacity var(--duration-fast) var(--ease);
+}
+
+.gallery__arrow svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.gallery__arrow--prev {
+    left: var(--space-3);
+}
+
+.gallery__arrow--next {
+    right: var(--space-3);
+}
+
+.gallery__arrow:disabled {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gallery__counter {
+    position: absolute;
+    left: 50%;
+    bottom: var(--space-4);
+    transform: translateX(-50%);
+    padding: var(--space-1) var(--space-3);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--palette-encre) 75%, transparent);
+    color: var(--palette-blanc);
+    font-size: var(--step--1);
+    font-weight: var(--font-weight-strong);
+}
+
+.gallery__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gallery__thumb {
+    display: block;
+    width: 4.5rem;
+    height: 4.5rem;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    background: none;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: opacity var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
+}
+
+.gallery__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery__thumb:hover,
+.gallery__thumb[aria-current='true'] {
+    opacity: 1;
+}
+
+.gallery__thumb[aria-current='true'] {
+    border-color: var(--color-action-bg);
+}
+
+/* ---------- Visionneuse plein écran ---------- */
+.lightbox {
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: color-mix(in srgb, var(--palette-encre) 94%, transparent);
+    color: var(--palette-blanc);
+}
+
+.lightbox::backdrop {
+    background: color-mix(in srgb, var(--palette-encre) 60%, transparent);
+}
+
+.lightbox[open] {
+    animation: lightbox-in 220ms var(--ease);
+}
+
+@keyframes lightbox-in {
+    from {
+        opacity: 0;
+    }
+}
+
+.has-lightbox {
+    overflow: hidden;
+}
+
+.lightbox__track {
+    display: flex;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.lightbox__track::-webkit-scrollbar {
+    display: none;
+}
+
+.lightbox__slide {
+    flex: 0 0 100%;
+    display: grid;
+    place-items: center;
+    padding: clamp(var(--space-4), 5vw, var(--space-8));
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+}
+
+.lightbox__slide img {
+    max-width: 100%;
+    max-height: calc(100dvh - 2 * clamp(var(--space-4), 5vw, var(--space-8)));
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
+.lightbox__close,
+.lightbox__arrow {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--palette-blanc) 14%, transparent);
+    color: var(--palette-blanc);
+    cursor: pointer;
+}
+
+.lightbox__close:hover,
+.lightbox__arrow:hover {
+    background: color-mix(in srgb, var(--palette-blanc) 26%, transparent);
+}
+
+.lightbox__close:focus-visible,
+.lightbox__arrow:focus-visible {
+    outline-color: var(--palette-blanc);
+}
+
+.lightbox__close svg,
+.lightbox__arrow svg {
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.lightbox__close {
+    top: var(--space-4);
+    right: var(--space-4);
+}
+
+.lightbox__arrow {
+    top: 50%;
+    margin-top: -1.5rem;
+}
+
+.lightbox__arrow--prev {
+    left: var(--space-4);
+}
+
+.lightbox__arrow--next {
+    right: var(--space-4);
+}
+
+.lightbox__counter {
+    position: absolute;
+    left: 50%;
+    bottom: var(--space-4);
+    transform: translateX(-50%);
+    font-weight: var(--font-weight-strong);
+}
+
+/* Sur mobile : on glisse au doigt, les flèches de la visionneuse sont superflues */
+@media (max-width: 47.99rem) {
+    .lightbox__arrow {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gallery__track {
+        scroll-behavior: auto;
+    }
+
+    .gallery__zoom::after {
+        display: none;
+    }
+
+    .gallery__zoom:hover img {
+        transform: none;
+    }
 }

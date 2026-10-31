@@ -2,7 +2,6 @@
 
 {% set product = view.product %}
 {% set settings = site_settings() %}
-{% set main_image = product_image(product.images.first ?: null, '(min-width: 64rem) 34rem, 100vw') %}
 
 {% block title %}{{ product.sumupSeoTitle ?: product.name }} | {{ settings.siteName }}{% endblock %}
 {% block description %}{{ (product.sumupSeoDescription ?: (product.description ? product.description|striptags : product.name ~ ', vitrail fait main par ' ~ settings.siteName ~ '.'))|u.truncate(160, '…', false) }}{% endblock %}
@@ -20,26 +19,7 @@
         </nav>
 
         <div class="product">
-            <div class="product__gallery">
-                <div class="lancet product__main-image">
-                    {% if main_image %}
-                        <img src="{{ main_image.src }}" srcset="{{ main_image.srcset }}" sizes="{{ main_image.sizes }}"
-                             width="{{ main_image.width }}" height="{{ main_image.height }}" alt="{{ main_image.alt }}" fetchpriority="high">
-                    {% else %}
-                        <twig:GlassArt :motif="glass_motif(product)" />
-                    {% endif %}
-                </div>
-                {% if product.images|length > 1 %}
-                    <ul class="product__thumbs">
-                        {% for image in product.images|slice(1) %}
-                            {% set attrs = product_image(image, '8rem') %}
-                            {% if attrs %}
-                                <li><img src="{{ attrs.src }}" srcset="{{ attrs.srcset }}" sizes="{{ attrs.sizes }}" width="{{ attrs.width }}" height="{{ attrs.height }}" alt="{{ attrs.alt }}" loading="lazy" decoding="async"></li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            </div>
+            {{ include('shop/_gallery.html.twig') }}
 
             <div class="product__info stack">
                 <h1 class="product__title">{{ product.name }}</h1>

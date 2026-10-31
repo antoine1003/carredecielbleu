@@ -58,6 +58,8 @@ Valeurs par défaut (placeholders) dans `.env` ; valeurs réelles dans `.env.loc
 | `MAILER_DSN` | Serveur SMTP d'envoi |
 | `DEFAULT_URI`, `SITE_URL` | URL publique du site (liens absolus, canonical, sitemap, emails) |
 | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Expéditeur des emails |
+| `BREVO_API_KEY` | Clé API Brevo pour la newsletter (secret : `.env.local` ou serveur). Vide = formulaire masqué |
+| `BREVO_API_URL` | Adresse de l'API Brevo (défaut `https://api.brevo.com/v3`) |
 
 ## Déploiement (VPS Hostinger, Apache + PHP-FPM)
 

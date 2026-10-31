@@ -5,3 +5,8 @@ framework:
             policy: sliding_window
             limit: 5
             interval: '15 minutes'
+        # Newsletter : 5 inscriptions par quart d'heure et par adresse IP
+        newsletter_subscription:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'

@@ -63,6 +63,26 @@ class SiteSetting
     #[ORM\Column(length: 32, enumType: SoldOutBehavior::class)]
     private SoldOutBehavior $soldOutBehavior = SoldOutBehavior::Hide;
 
+    // ---------- Newsletter (Brevo) : la clé API reste dans la variable d'environnement BREVO_API_KEY ----------
+
+    #[ORM\Column]
+    private bool $newsletterEnabled = false;
+
+    /** Identifiant de la liste de contacts Brevo qui reçoit les inscriptions. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\Positive]
+    private ?int $newsletterListId = null;
+
+    #[ORM\Column(length: 160)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 160)]
+    private string $newsletterTitle = 'Recevoir les nouvelles de l\'atelier';
+
+    #[ORM\Column(length: 300)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 300)]
+    private string $newsletterText = '[Nouvelles créations, dates des ateliers… Texte d\'invitation à écrire par l\'artisane]';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -172,6 +192,54 @@ class SiteSetting
     public function setSoldOutBehavior(SoldOutBehavior $soldOutBehavior): static
     {
         $this->soldOutBehavior = $soldOutBehavior;
+
+        return $this;
+    }
+
+    public function isNewsletterEnabled(): bool
+    {
+        return $this->newsletterEnabled;
+    }
+
+    public function setNewsletterEnabled(bool $newsletterEnabled): static
+    {
+        $this->newsletterEnabled = $newsletterEnabled;
+
+        return $this;
+    }
+
+    public function getNewsletterListId(): ?int
+    {
+        return $this->newsletterListId;
+    }
+
+    public function setNewsletterListId(?int $newsletterListId): static
+    {
+        $this->newsletterListId = $newsletterListId;
+
+        return $this;
+    }
+
+    public function getNewsletterTitle(): string
+    {
+        return $this->newsletterTitle;
+    }
+
+    public function setNewsletterTitle(?string $newsletterTitle): static
+    {
+        $this->newsletterTitle = (string) $newsletterTitle;
+
+        return $this;
+    }
+
+    public function getNewsletterText(): string
+    {
+        return $this->newsletterText;
+    }
+
+    public function setNewsletterText(?string $newsletterText): static
+    {
+        $this->newsletterText = (string) $newsletterText;
 
         return $this;
     }

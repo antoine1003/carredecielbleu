@@ -7,6 +7,7 @@ namespace App\Twig;
 use App\Entity\Page;
 use App\Entity\SiteSetting;
 use App\Repository\PageRepository;
+use App\Service\Newsletter\NewsletterSubscriber;
 use App\Service\SiteSettingsProvider;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -22,6 +23,7 @@ final class SiteExtension extends AbstractExtension
     public function __construct(
         private readonly SiteSettingsProvider $settings,
         private readonly PageRepository $pages,
+        private readonly NewsletterSubscriber $newsletter,
     ) {
     }
 
@@ -30,6 +32,7 @@ final class SiteExtension extends AbstractExtension
         return [
             new TwigFunction('site_settings', $this->siteSettings(...)),
             new TwigFunction('footer_pages', $this->footerPages(...)),
+            new TwigFunction('newsletter_available', $this->newsletter->isAvailable(...)),
         ];
     }
 

@@ -1,0 +1,41 @@
+{#
+    Inscription à la newsletter (Brevo). Variables : variant = 'banner' (accueil) | 'compact' (pied de page).
+    Affiché seulement si la newsletter est activée et configurée (newsletter_available()).
+#}
+{% set settings = site_settings() %}
+{% set variant = variant|default('banner') %}
+{% set field_id = 'newsletter-email-' ~ variant %}
+<section class="newsletter newsletter--{{ variant }}" id="newsletter" aria-labelledby="newsletter-title-{{ variant }}">
+    {% if variant == 'banner' %}<twig:Shards class="newsletter__shards" />{% endif %}
+    <div class="newsletter__text">
+        {% if variant == 'banner' %}
+            <h2 class="newsletter__title" id="newsletter-title-{{ variant }}">{{ settings.newsletterTitle }}</h2>
+        {% else %}
+            <p class="newsletter__title" id="newsletter-title-{{ variant }}">{{ settings.newsletterTitle }}</p>
+        {% endif %}
+        <p class="newsletter__intro">{{ settings.newsletterText }}</p>
+    </div>
+
+    <form class="newsletter__form" method="post" action="{{ path('app_newsletter_subscribe') }}">
+        {% for type, messages in app.flashes(['newsletter_success', 'newsletter_error']) %}
+            {% for message in messages %}
+                <p class="newsletter__message newsletter__message--{{ type == 'newsletter_error' ? 'error' : 'success' }}" role="{{ type == 'newsletter_error' ? 'alert' : 'status' }}">{{ message }}</p>
+            {% endfor %}
+        {% endfor %}
+        <input type="hidden" name="_token" value="{{ csrf_token('newsletter') }}">
+        <input type="hidden" name="back" value="{{ app.request.pathInfo }}">
+        <div class="newsletter__row">
+            <label class="visually-hidden" for="{{ field_id }}">Votre adresse email</label>
+            <input class="field__input newsletter__input" id="{{ field_id }}" type="email" name="email" required maxlength="180"
+                   autocomplete="email" placeholder="Votre adresse email" aria-describedby="newsletter-note-{{ variant }}">
+            <button class="btn {{ variant == 'banner' ? 'btn--light' : 'btn--primary' }}" type="submit">M'abonner</button>
+        </div>
+        <div class="honeypot" aria-hidden="true">
+            <label for="newsletter-website-{{ variant }}">Ne pas remplir ce champ</label>
+            <input id="newsletter-website-{{ variant }}" type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+        <p class="newsletter__note" id="newsletter-note-{{ variant }}">
+            Désinscription en un clic dans chaque email. <a href="{{ path('app_page', {slug: 'politique-de-confidentialite'}) }}">Confidentialité</a>
+        </p>
+    </form>
+</section>

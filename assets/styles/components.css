@@ -351,3 +351,122 @@
     color: var(--color-error);
     font-weight: var(--font-weight-strong);
 }
+
+/* Bouton clair, pour les fonds sombres */
+.btn--light {
+    background: var(--color-surface);
+    color: var(--color-action-bg);
+}
+
+.btn--light:hover {
+    background: var(--color-bg);
+    color: var(--color-action-bg);
+}
+
+/* ---------- Newsletter ---------- */
+.newsletter {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-5) var(--space-7);
+}
+
+.newsletter__text {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.newsletter__form {
+    flex: 1 1 22rem;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.newsletter__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.newsletter__input {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.newsletter__note {
+    font-size: var(--step--1);
+}
+
+.newsletter__message {
+    font-weight: var(--font-weight-strong);
+}
+
+/* Bandeau de l'accueil : panneau encre, comme un vitrail vu à contre-jour */
+.newsletter--banner {
+    overflow: hidden;
+    padding: clamp(var(--space-5), 5vw, var(--space-8));
+    background: var(--color-action-bg);
+    color: var(--color-action-text);
+    border-radius: var(--radius-md);
+}
+
+.newsletter--banner .newsletter__title {
+    color: var(--color-action-text);
+    font-size: var(--step-3);
+}
+
+.newsletter--banner .newsletter__intro {
+    margin-top: var(--space-3);
+}
+
+.newsletter--banner .newsletter__note,
+.newsletter--banner .newsletter__note a,
+.newsletter--banner .newsletter__message {
+    color: var(--color-action-text);
+}
+
+.newsletter--banner :focus-visible {
+    outline-color: var(--color-action-text);
+}
+
+.newsletter__shards {
+    top: auto;
+    bottom: -7rem;
+    right: -6rem;
+    width: min(18rem, 45%);
+    --shard-opacity: 0.3;
+}
+
+.newsletter__shards .shards__piece {
+    mix-blend-mode: screen;
+}
+
+/* Version compacte du pied de page */
+.newsletter--compact {
+    padding-bottom: var(--space-6);
+    margin-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.newsletter--compact .newsletter__title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    color: var(--color-heading);
+}
+
+.newsletter--compact .newsletter__intro,
+.newsletter--compact .newsletter__note {
+    color: var(--color-text-muted);
+}
+
+.newsletter__message--error {
+    color: var(--color-error);
+}
+
+.newsletter--compact .newsletter__message--success {
+    color: var(--color-status-available);
+}

@@ -34,5 +34,9 @@
                 </div>
             </section>
         {% endif %}
+
+        {% if newsletter_available() %}
+            <div class="section">{{ include('partials/_newsletter.html.twig', {variant: 'banner'}) }}</div>
+        {% endif %}
     </div>
 {% endblock %}

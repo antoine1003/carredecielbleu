@@ -89,6 +89,12 @@ Règles : logique métier dans `Service/`, pas dans les contrôleurs ni les enti
 - Emails : un échec d'envoi est journalisé (sans l'adresse) et signalé, sans annuler l'inscription ni la confirmation. Couleurs des emails écrites en dur dans `templates/emails/_layout.html.twig` (seule exception aux tokens : les clients mail ignorent les variables CSS).
 - Aucun paiement d'atelier géré par le site.
 
+### Newsletter (Brevo)
+- Inscription directe (simple opt-in) : `NewsletterSubscriber` appelle l'API Brevo `POST /v3/contacts` (`updateEnabled: true`, ajout à la liste réglée dans l'admin). Le site ne stocke aucune adresse.
+- Clé API UNIQUEMENT dans la variable d'environnement `BREVO_API_KEY` (jamais en base ni dans l'admin) ; `BREVO_API_URL` permet de pointer vers un faux serveur en test. L'admin (Réglages › Newsletter) règle l'activation, l'ID de liste et les textes, et indique si la clé est présente.
+- Le formulaire ne s'affiche que si la newsletter est activée, une liste choisie ET la clé présente (`newsletter_available()`) : bandeau sur l'accueil, version compacte dans le pied de page des autres pages (jamais deux formulaires sur une page).
+- Protection : CSRF, honeypot `website`, rate limiting `newsletter_subscription` (5 / 15 min / IP), redirection de retour limitée aux chemins internes. Échec Brevo : message neutre au public, erreur journalisée sans l'adresse.
+
 ## Design — identité « Carré de ciel bleu »
 
 - Ambiance : lumière à travers le verre, nature, couleurs de vitrail. Doit se démarquer d'un template générique.

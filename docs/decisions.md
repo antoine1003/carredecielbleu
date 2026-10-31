@@ -58,3 +58,12 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - RGPD : minimum de données (prénom, nom, email, téléphone facultatif), consentement obligatoire, suppression par la personne (lien) ou par l'admin, purge automatique 90 jours après l'atelier (`app:registrations:purge`, à planifier en cron). Durée à reporter dans la politique de confidentialité.
 - Export CSV (atelier ou global) : UTF-8 avec BOM, séparateur point-virgule, cellules commençant par = + - @ neutralisées (injection de formules).
 - En local : MailDev (SMTP 1025, lecture sur http://localhost:1080).
+
+## 2026-10-31 — Newsletter Brevo
+
+- Inscription directe à une liste Brevo depuis le site (simple opt-in, demandé par le client) : `POST /v3/contacts` avec `listIds` et `updateEnabled: true` (un contact déjà connu est simplement ajouté à la liste). Le site ne conserve aucune adresse.
+- Clé API dans la variable d'environnement `BREVO_API_KEY` (choix du client, conforme à la règle « secrets hors base »). L'admin règle activation, ID de liste et textes ; il affiche si la clé est présente.
+- Formulaire : bandeau sur l'accueil, version compacte dans le pied de page des autres pages. CSRF, champ piège, limitation 5 / 15 min / IP.
+- Vérifié avec un faux serveur Brevo local (`BREVO_API_URL`) : requête, en-tête `api-key`, corps JSON, cas d'erreur 401. Pas encore testé avec un vrai compte Brevo.
+- Piste RGPD non retenue pour l'instant : le double opt-in Brevo (email de confirmation avant ajout à la liste), activable plus tard via `POST /v3/contacts/doubleOptinConfirmation`.
+- `symfony/http-client` déclaré explicitement. Mise à jour corrective Symfony 8.1.10 (faille CVE-2026-45070 dans `symfony/mime`).

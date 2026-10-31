@@ -1,5 +1,9 @@
 {% set settings = site_settings() %}
 <footer class="site-footer">
+    {# Formulaire compact partout sauf sur l'accueil, qui a déjà le bandeau #}
+    {% if newsletter_available() and app.request.attributes.get('_route') != 'app_home' %}
+        <div class="container">{{ include('partials/_newsletter.html.twig', {variant: 'compact'}) }}</div>
+    {% endif %}
     <div class="container site-footer__inner">
         <p>{{ settings.siteName }}, vitraux faits main à {{ settings.city }}</p>
         <ul class="site-footer__links">

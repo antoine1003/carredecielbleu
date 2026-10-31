@@ -66,34 +66,17 @@
                 {% else %}
                     {{ form_start(form, {attr: {class: 'stack', novalidate: 'novalidate', action: path('app_workshop', {slug: workshop.slug}) ~ '#inscription'}}) }}
                         {% for error in form.vars.errors %}<p class="notice notice--error" role="alert">{{ error.message }}</p>{% endfor %}
-                        <fieldset class="date-options">
+                        <fieldset class="date-options"{% if not form.sessions.vars.valid %} aria-describedby="sessions_error"{% endif %}>
                             <legend class="date-options__legend">Dates qui vous conviennent</legend>
+                            <p class="date-options__hint">Cochez toutes celles où vous êtes disponible.</p>
                             {% for error in form.sessions.vars.errors %}<p class="field__error" id="sessions_error">{{ error.message }}</p>{% endfor %}
                             {% set choices_by_value = {} %}
                             {% for child in form.sessions %}{% set choices_by_value = choices_by_value|merge({('s' ~ child.vars.value): child}) %}{% endfor %}
-                            {% for session in workshop.sessions %}
-                                {% set child = choices_by_value['s' ~ session.id] ?? null %}
-                                {% set count = session_count(session) %}
-                                {% set names = session_public_names(session) %}
-                                <label class="date-option{{ child is null ? ' date-option--disabled' }}"{% if child %} for="{{ child.vars.id }}"{% endif %}>
-                                    {% if child %}
-                                        {{ form_widget(child, {attr: {class: 'date-option__input'}}) }}
-                                    {% else %}
-                                        <input class="date-option__input" type="checkbox" disabled>
-                                    {% endif %}
-                                    <span class="date-option__date">{{ ui.session_when(session) }}</span>
-                                    {% if session.effectiveLocation %}<span class="date-option__place">{{ session.effectiveLocation }}</span>{% endif %}
-                                    <span class="date-option__count">
-                                        {% if session.status.value == 'confirmed' %}<strong>Date confirmée</strong> · {% endif %}
-                                        {% if child is null %}
-                                            Complet
-                                        {% else %}
-                                            {{ count == 0 ? 'Aucune inscription' : count ~ ' personne' ~ (count > 1 ? 's') ~ ' inscrite' ~ (count > 1 ? 's') }}{% if names is not empty %} ({{ names|join(', ') }}){% endif %}
-                                            · {{ session_remaining(session) }} place{{ session_remaining(session) > 1 ? 's' }}
-                                        {% endif %}
-                                    </span>
-                                </label>
-                            {% endfor %}
+                            <div class="date-options__list">
+                                {% for session in workshop.sessions %}
+                                    {{ ui.date_tile(session, choices_by_value['s' ~ session.id] ?? null) }}
+                                {% endfor %}
+                            </div>
                             {% do form.sessions.setRendered() %}
                         </fieldset>
 

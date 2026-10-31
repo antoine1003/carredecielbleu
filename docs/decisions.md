@@ -112,3 +112,10 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Suivi d'un atelier : bandeau « où en est-on » (date retenue avec participants et coordonnées, bouton « Écrire aux participants » en copie cachée, ou date la plus demandée à retenir), dates en lignes avec mini-calendrier, jauge, noms cliquables, bouton « Retenir cette date » (fenêtre EasyAdmin `twig:ea:Modal` qui annonce le nombre d'emails de chaque sorte ; « ne plus proposer les autres dates » coché par défaut). Dates passées et tableau détaillé repliés.
 - Couleurs de l'admin via les variables Bootstrap (`--bs-*`) : suivent le thème clair/sombre d'EasyAdmin.
 - Vérifié sur un atelier de test (supprimé ensuite) : état « date à choisir », date la plus demandée, décompte annoncé (3 confirmations, 1 information), confirmation réelle (statuts, autres dates annulées, message de résultat), liste, accueil, 1280 px sombre et 375 px clair.
+
+## 2026-10-31 — Choix des dates en tuiles (formulaire d'inscription)
+
+- Trois propositions comparées (tuiles calendrier, vitraux, liste à interrupteurs) : choix des tuiles.
+- Chaque date est une tuile cliquable (`date-tile`, macro `date_tile` de `templates/workshop/_macros.html.twig`) : mini-calendrier (mois, jour, jour de la semaine) qui passe à l'encre une fois choisie, horaire et lieu, places en pastilles (une par place, pleine si prise ; texte seul au-delà de 12 places), inscrits (prénom + initiale si accord), mention « Date confirmée », coche ronde. Date complète : tuile en pointillés, non cliquable.
+- La vraie case à cocher reste dans la tuile (invisible, couvre toute la tuile) : clavier, lecteurs d'écran et envoi sans JavaScript inchangés. Erreur « Cochez au moins une date » reliée au groupe (`aria-describedby`).
+- Vérifié : sélection au clic, page atelier à 1280 et 375 px sans débordement, message d'erreur, styleguide (les trois états).

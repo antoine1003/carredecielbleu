@@ -118,24 +118,38 @@
             <form class="sg-form stack" style="--stack-gap: var(--space-5)" action="#" onsubmit="return false">
                 <fieldset class="date-options">
                     <legend class="date-options__legend">Dates qui vous conviennent</legend>
-                    <label class="date-option">
-                        <input class="date-option__input" type="checkbox" name="dates[]" value="1" checked>
-                        <span class="date-option__date">[Date 1]</span>
-                        <span class="date-option__place">[Lieu]</span>
-                        <span class="date-option__count">4 personnes inscrites</span>
-                    </label>
-                    <label class="date-option">
-                        <input class="date-option__input" type="checkbox" name="dates[]" value="2">
-                        <span class="date-option__date">[Date 2]</span>
-                        <span class="date-option__place">[Lieu]</span>
-                        <span class="date-option__count">[Prénom I.] et [Prénom I.]</span>
-                    </label>
-                    <label class="date-option date-option--disabled">
-                        <input class="date-option__input" type="checkbox" name="dates[]" value="3" disabled>
-                        <span class="date-option__date">[Date 3]</span>
-                        <span class="date-option__place">[Lieu]</span>
-                        <span class="date-option__count">Complet</span>
-                    </label>
+                    <p class="date-options__hint">Cochez toutes celles où vous êtes disponible.</p>
+                    <div class="date-options__list">
+                        <label class="date-tile">
+                            <input class="date-tile__input" type="checkbox" name="dates[]" value="1" checked>
+                            <span class="date-tile__cal" aria-hidden="true"><small>nov.</small><b>5</b><em>jeu.</em></span>
+                            <span class="date-tile__body">
+                                <span class="date-tile__day">[Date 1]</span>
+                                <span class="date-tile__meta">14 h – 17 h · [Lieu]</span>
+                                <span class="date-tile__meta"><span class="seats" aria-hidden="true"><i class="seats__taken"></i><i class="seats__taken"></i><i></i><i></i><i></i><i></i></span> 4 places restantes · 2 inscrites ([Prénom I.])</span>
+                                <span class="date-tile__tag">Date confirmée : l'atelier aura lieu</span>
+                            </span>
+                            <span class="date-tile__check" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg></span>
+                        </label>
+                        <label class="date-tile">
+                            <input class="date-tile__input" type="checkbox" name="dates[]" value="2">
+                            <span class="date-tile__cal" aria-hidden="true"><small>nov.</small><b>12</b><em>jeu.</em></span>
+                            <span class="date-tile__body">
+                                <span class="date-tile__day">[Date 2]</span>
+                                <span class="date-tile__meta">14 h – 17 h · [Lieu]</span>
+                                <span class="date-tile__meta"><span class="seats" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span> 6 places restantes · personne pour l'instant</span>
+                            </span>
+                            <span class="date-tile__check" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg></span>
+                        </label>
+                        <div class="date-tile date-tile--full" aria-disabled="true">
+                            <span class="date-tile__cal" aria-hidden="true"><small>nov.</small><b>21</b><em>sam.</em></span>
+                            <span class="date-tile__body">
+                                <span class="date-tile__day">[Date 3]</span>
+                                <span class="date-tile__meta">10 h – 12 h · [Lieu]</span>
+                                <span class="date-tile__meta"><strong>Complet</strong></span>
+                            </span>
+                        </div>
+                    </div>
                 </fieldset>
                 <div class="field">
                     <label class="field__label" for="sg-firstname">Prénom</label>

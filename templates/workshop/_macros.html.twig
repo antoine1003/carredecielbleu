@@ -29,3 +29,58 @@
     {{- session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize -}}
     {%- if session.endsAt %} – {{ session.endsAt|format_datetime('none', 'short', locale: 'fr') }}{% endif -%}
 {% endmacro %}
+
+{# « 14 h – 17 h 30 » : minutes affichées seulement si elles ne sont pas nulles #}
+{% macro hours(session) %}
+    {{- session.startsAt|format_time(pattern: session.startsAt|date('i') == '00' ? "H' h'" : "H' h 'mm", locale: 'fr') -}}
+    {%- if session.endsAt %} – {{ session.endsAt|format_time(pattern: session.endsAt|date('i') == '00' ? "H' h'" : "H' h 'mm", locale: 'fr') }}{% endif -%}
+{% endmacro %}
+
+{#
+    Date proposée dans le formulaire d'inscription : tuile cliquable avec mini-calendrier,
+    horaire, lieu, places (une pastille par place) et inscrits. child = case du formulaire,
+    null si la date n'accepte plus d'inscription (complète).
+#}
+{% macro date_tile(session, child) %}
+    {% import _self as ui %}
+    {% set count = session_count(session) %}
+    {% set remaining = session_remaining(session) %}
+    {% set capacity = session.effectiveCapacity %}
+    {% set names = session_public_names(session) %}
+    {% set full = child is null %}
+    {% set tag = full ? 'div' : 'label' %}
+    <{{ tag }} class="date-tile{{ full ? ' date-tile--full' }}"{% if not full %} for="{{ child.vars.id }}"{% else %} aria-disabled="true"{% endif %}>
+        {% if not full %}{{ form_widget(child, {attr: {class: 'date-tile__input'}}) }}{% endif %}
+        <span class="date-tile__cal" aria-hidden="true">
+            <small>{{ session.startsAt|format_date(pattern: 'MMM', locale: 'fr') }}</small>
+            <b>{{ session.startsAt|format_date(pattern: 'd', locale: 'fr') }}</b>
+            <em>{{ session.startsAt|format_date(pattern: 'EEE', locale: 'fr') }}</em>
+        </span>
+        <span class="date-tile__body">
+            <span class="date-tile__day">
+                {{- session.startsAt|format_date(pattern: 'EEEE d MMMM', locale: 'fr')|capitalize -}}
+                {%- if session.startsAt|date('Y') != 'now'|date('Y') %} {{ session.startsAt|date('Y') }}{% endif -%}
+            </span>
+            <span class="date-tile__meta">{{ ui.hours(session) }}{% if session.effectiveLocation %} · {{ session.effectiveLocation }}{% endif %}</span>
+            {% if full %}
+                <span class="date-tile__meta"><strong>Complet</strong></span>
+            {% else %}
+                <span class="date-tile__meta">
+                    {% if capacity <= 12 %}
+                        <span class="seats" aria-hidden="true">{% for i in 1..capacity %}<i{{ i <= count ? ' class="seats__taken"' }}></i>{% endfor %}</span>
+                    {% endif %}
+                    {{ remaining }} place{{ remaining > 1 ? 's' }} restante{{ remaining > 1 ? 's' }}
+                    · {% if count == 0 %}personne pour l'instant{% else %}{{ count }} inscrite{{ count > 1 ? 's' }}{% if names is not empty %} ({{ names|join(', ') }}){% endif %}{% endif %}
+                </span>
+            {% endif %}
+            {% if session.status.value == 'confirmed' %}
+                <span class="date-tile__tag">Date confirmée : l'atelier aura lieu</span>
+            {% endif %}
+        </span>
+        {% if not full %}
+            <span class="date-tile__check" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>
+            </span>
+        {% endif %}
+    </{{ tag }}>
+{% endmacro %}

@@ -257,54 +257,187 @@
     margin: 0;
     padding: 0;
     border: 0;
+    min-width: 0;
 }
 
 .date-options__legend {
-    margin-bottom: var(--space-3);
     padding: 0;
     font-weight: var(--font-weight-strong);
 }
 
-.date-option {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2) var(--space-4);
-    min-height: var(--tap-min);
-    padding-block: var(--space-4);
-    border-bottom: 1px solid var(--color-border);
-    cursor: pointer;
-}
-
-.date-option:first-of-type {
-    border-top: 1px solid var(--color-border);
-}
-
-.date-option__input {
-    width: 1.375rem;
-    height: 1.375rem;
-    margin: 0;
-    flex: none;
-    accent-color: var(--color-action-bg);
-}
-
-.date-option__date {
-    flex: 1 1 12rem;
-    font-family: var(--font-display);
-    font-size: var(--step-1);
-}
-
-.date-option__place,
-.date-option__count {
+.date-options__hint {
+    margin-top: var(--space-1);
+    font-size: var(--step--1);
     color: var(--color-text-muted);
 }
 
-.date-option--disabled {
+.date-options__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+/* Une date = une tuile cliquable : mini-calendrier, détails, coche ronde */
+.date-tile {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-4) calc(var(--space-4) + 2rem) var(--space-4) var(--space-4);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease), background-color var(--duration-fast) var(--ease);
+}
+
+/* Vraie case à cocher, invisible mais couvrant la tuile (clavier, lecteurs d'écran) */
+.date-tile__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.date-tile__cal {
+    display: grid;
+    justify-items: center;
+    width: 3.75rem;
+    padding: var(--space-1) 0 0.4rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    line-height: 1.05;
+    transition: background-color var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease);
+}
+
+.date-tile__cal small {
+    font-size: 0.72rem;
+    font-weight: var(--font-weight-strong);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-link);
+}
+
+.date-tile__cal b {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: var(--font-weight-display);
+}
+
+.date-tile__cal em {
+    font-size: 0.78rem;
+    font-style: normal;
+    color: var(--color-text-muted);
+}
+
+.date-tile__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.date-tile__day {
+    font-weight: var(--font-weight-strong);
+}
+
+.date-tile__meta {
+    font-size: var(--step--1);
+    color: var(--color-text-muted);
+}
+
+.date-tile__tag {
+    margin-top: var(--space-1);
+    font-size: var(--step--1);
+    font-weight: var(--font-weight-strong);
+    color: var(--color-status-available);
+}
+
+.date-tile__check {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 2px solid var(--color-field-border);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: transparent;
+}
+
+.date-tile__check svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.date-tile:hover {
+    border-color: var(--color-field-border);
+}
+
+.date-tile:has(.date-tile__input:checked) {
+    border-color: var(--color-action-bg);
+    background: color-mix(in srgb, var(--palette-ciel) 22%, var(--color-surface));
+}
+
+.date-tile:has(.date-tile__input:checked) .date-tile__cal {
+    background: var(--color-action-bg);
+}
+
+.date-tile:has(.date-tile__input:checked) .date-tile__cal :is(small, b, em) {
+    color: var(--color-action-text);
+}
+
+.date-tile:has(.date-tile__input:checked) .date-tile__check {
+    border-color: var(--color-action-bg);
+    background: var(--color-action-bg);
+    color: var(--color-action-text);
+}
+
+.date-tile:has(.date-tile__input:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+}
+
+/* Date complète : visible mais non sélectionnable */
+.date-tile--full {
+    padding-right: var(--space-4);
+    border-style: dashed;
+    background: transparent;
     cursor: not-allowed;
 }
 
-.date-option--disabled .date-option__date {
-    text-decoration: line-through;
+.date-tile--full .date-tile__cal {
+    opacity: 0.55;
+}
+
+.date-tile--full:hover {
+    border-color: var(--color-border);
+}
+
+/* Places : une pastille par place, pleine si prise */
+.seats {
+    display: inline-flex;
+    gap: 3px;
+    margin-right: var(--space-1);
+    vertical-align: 0.05em;
+}
+
+.seats i {
+    width: 0.6rem;
+    height: 0.6rem;
+    border: 1.5px solid var(--color-link);
+    border-radius: 50%;
+}
+
+.seats .seats__taken {
+    background: var(--color-link);
 }
 
 /* ---------- Champs de formulaire ---------- */

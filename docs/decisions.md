@@ -131,3 +131,13 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Versions web générées en WebP dans `assets/images/` : 96 px (en-tête, affiché à 44 px), 320 et 640 px (accueil, `srcset`, image LCP en `fetchpriority="high"`).
 - Remplace l'illustration « lune » de l'accueil et la petite fenêtre en ogive de l'en-tête. Texte alternatif vide : le nom du site est écrit juste à côté (en-tête) ou le logo est décoratif (accueil).
 - Piste non faite : favicon et image de partage (Open Graph) à partir du logo.
+
+## 2026-10-31 — Acompte des ateliers
+
+- Choix : acompte pour valider la place une fois la date confirmée, payé sur SumUp (lien saisi sur l'atelier : article « Acompte » de la boutique en ligne SumUp). Pas de RIB (rapprochement manuel, délais), pas d'API SumUp (clé secrète, notifications, erreurs à gérer) : l'artisane coche « Acompte reçu ». Le site ne touche jamais à l'argent.
+- Réglages › Ateliers : délai de paiement (5 jours après la confirmation par défaut), remboursement intégral jusqu'à N jours avant l'atelier (7 par défaut), conditions complémentaires (texte libre, par défaut : remboursement si l'atelier est annulé par l'artisane).
+- Inscription : conditions affichées et case obligatoire (atelier avec acompte seulement), acceptation horodatée. Email récapitulatif : acompte annoncé. Email de confirmation : bloc acompte (montant, date limite, bouton SumUp, conditions).
+- Suivi de l'atelier : « N acomptes reçus sur M », badge par participant (reçu / en attente / en retard), bouton « Acompte reçu » (et « Annuler »), bouton « Relancer » (email de rappel, date de relance mémorisée). Retard : simple signalement, la place n'est pas libérée automatiquement.
+- Annulation : message adapté (remboursé / conservé) avant et après l'annulation ; email à l'artisane pour toute annulation d'une date confirmée.
+- Juridique (à faire valider par l'artisane : comptable, CMA) : pour une activité de loisir à date déterminée, le droit de rétractation de 14 jours ne s'applique normalement pas, mais les conditions doivent être claires et acceptées avant paiement.
+- Migration `Version20261031135213`. Vérifié de bout en bout sur un atelier de test (supprimé ensuite) : refus sans case cochée, inscription, emails (récapitulatif, confirmation avec acompte, relance) dans MailDev, « Acompte reçu », page d'annulation dans les deux cas (remboursé / conservé), annulation réelle et email à l'artisane.

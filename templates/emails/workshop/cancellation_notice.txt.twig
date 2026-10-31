@@ -1,0 +1,14 @@
+{% autoescape false %}
+{{ registration.firstName }} {{ registration.lastName }} ({{ registration.email }}{% if registration.phone %}, {{ registration.phone }}{% endif %}) vient d'annuler son inscription à l'atelier « {{ workshop.title }} » :
+
+{{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}
+
+{% if depositPaid and refundable %}ACOMPTE À REMBOURSER : l'acompte de {{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }} avait été reçu et l'annulation est faite dans le délai. Remboursez-le depuis SumUp (historique des transactions, puis « Rembourser »).
+{% elseif depositPaid %}L'acompte avait été reçu. L'annulation est faite moins de {{ deposit_policy().refundDaysBefore }} jours avant l'atelier : selon vos conditions, l'acompte reste acquis.
+{% else %}Aucun acompte n'avait été reçu : il n'y a rien à rembourser.
+{% endif %}
+
+Une place s'est libérée sur cette date.
+
+Voir le suivi de l'atelier : {{ adminUrl }}
+{% endautoescape %}

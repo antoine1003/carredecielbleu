@@ -1,0 +1,20 @@
+{#
+    Conditions d'acompte et d'annulation d'un atelier (page publique et page d'annulation).
+    Variable : workshop. Règles : DepositPolicy, textes : réglages du site.
+#}
+{% set policy = deposit_policy() %}
+{% set terms = site_settings().cancellationTerms|trim %}
+<section class="deposit-terms" aria-labelledby="acompte-titre">
+    <h3 id="acompte-titre" class="deposit-terms__title">Acompte et annulation</h3>
+    <ul class="deposit-terms__list">
+        <li>Une fois la date confirmée, un acompte de <strong>{{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}</strong> vous sera demandé pour valider votre place, à régler en ligne sur SumUp sous {{ policy.paymentDays }} jour{{ policy.paymentDays > 1 ? 's' }}.</li>
+        <li>
+            {% if policy.refundDaysBefore > 0 %}
+                Annulation jusqu'à {{ policy.refundDaysBefore }} jour{{ policy.refundDaysBefore > 1 ? 's' }} avant l'atelier : acompte remboursé en totalité. Passé ce délai, l'acompte reste acquis.
+            {% else %}
+                Annulation jusqu'au jour de l'atelier : acompte remboursé en totalité.
+            {% endif %}
+        </li>
+        {% if terms %}<li>{{ terms|nl2br }}</li>{% endif %}
+    </ul>
+</section>

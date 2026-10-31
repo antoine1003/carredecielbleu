@@ -1,0 +1,13 @@
+{% autoescape false %}
+{%- set policy = deposit_policy() -%}
+{%- set deadline = policy.paymentDeadline(session) -%}
+{%- set amount = (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') -%}
+{%- set terms = site_settings().cancellationTerms|trim -%}
+POUR VALIDER VOTRE PLACE : acompte de {{ amount }}{% if deadline %}, à régler avant le {{ deadline|format_date('long', locale: 'fr') }}{% endif %}.
+{{ workshop.depositUrl ? 'Payer l\'acompte sur SumUp : ' ~ workshop.depositUrl : 'Je vous envoie très vite le lien de paiement.' }}
+
+{{ policy.refundDaysBefore > 0
+    ? 'Annulation jusqu\'à ' ~ policy.refundDaysBefore ~ ' jour' ~ (policy.refundDaysBefore > 1 ? 's') ~ ' avant l\'atelier' ~ (policy.refundLimit(session) ? ' (le ' ~ policy.refundLimit(session)|format_date('long', locale: 'fr') ~ ')') ~ ' : acompte remboursé en totalité. Passé ce délai, l\'acompte reste acquis.'
+    : 'Annulation jusqu\'au jour de l\'atelier : acompte remboursé en totalité.' }}
+{{ terms }}
+{% endautoescape %}

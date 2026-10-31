@@ -1,0 +1,18 @@
+{% autoescape false %}
+Bonjour {{ firstName }},
+
+Petit rappel : votre place à l'atelier « {{ workshop.title }} » sera définitivement réservée à réception de votre acompte.
+
+{{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}{% if session.effectiveLocation %}
+
+{{ session.effectiveLocation }}{% endif %}
+
+
+{{ include('emails/workshop/_deposit.txt.twig') }}
+
+Vous avez déjà payé ? Merci, et ne tenez pas compte de ce message.
+Vous ne pouvez plus venir ? Annulez votre inscription pour libérer la place : {{ cancelUrl }}
+
+À bientôt,
+{{ site_settings().siteName }}
+{% endautoescape %}

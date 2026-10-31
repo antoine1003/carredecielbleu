@@ -21,6 +21,8 @@ final readonly class SessionSummary
         public bool $canConfirm,
         /** Inscrits d'autres dates qui recevraient l'email d'information si on retenait celle-ci. */
         public int $othersToNotify,
+        /** Acomptes reçus parmi les inscrits de cette date. */
+        public int $depositsPaid = 0,
     ) {
     }
 }

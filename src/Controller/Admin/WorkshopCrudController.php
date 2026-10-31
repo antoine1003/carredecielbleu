@@ -23,6 +23,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
@@ -130,6 +131,14 @@ final class WorkshopCrudController extends AbstractCrudController
             ->setHelp('Utilisé pour toutes les dates qui n\'ont pas de lieu propre.');
         yield IntegerField::new('defaultCapacity', 'Places par date')->hideOnIndex()->setColumns('col-12 col-md-6')
             ->setHelp('Valeur par défaut, modifiable pour chaque date.');
+
+        yield FormField::addFieldset('Acompte', 'fa fa-euro-sign')
+            ->setHelp('Demandé par email une fois la date confirmée. Délai de paiement et conditions d\'annulation : Réglages › Ateliers.');
+        yield MoneyField::new('depositCents', 'Montant de l\'acompte')->setCurrency('EUR')->setStoredAsCents()
+            ->hideOnIndex()->setColumns('col-12 col-md-4')->setRequired(false)
+            ->setHelp('Vide = pas d\'acompte.');
+        yield UrlField::new('depositUrl', 'Lien de paiement SumUp')->hideOnIndex()->setColumns('col-12 col-md-8')
+            ->setHelp('Dans SumUp, créez un article « Acompte » à ce prix dans votre boutique en ligne, puis copiez ici l\'adresse de sa page.');
 
         // Situation de l'atelier (colonne de la liste) : date retenue, date à choisir, inscrits…
         yield IntegerField::new('id', 'Situation')->onlyOnIndex()->setSortable(false)

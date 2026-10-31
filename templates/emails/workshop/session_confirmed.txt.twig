@@ -9,7 +9,12 @@ Bonne nouvelle : l'atelier « {{ workshop.title }} » aura bien lieu à la date 
 
 {% if workshop.duration %}Durée : {{ workshop.duration }}.
 {% endif %}
-{% if workshop.priceInfo %}Tarif : {{ workshop.priceInfo }}. Aucun paiement n'est demandé sur le site.
+{% if deposit_policy().isRequired(workshop) %}
+
+{{ include('emails/workshop/_deposit.txt.twig') }}
+
+{% endif %}
+{% if workshop.priceInfo %}Tarif : {{ workshop.priceInfo }}.{% if not deposit_policy().isRequired(workshop) %} Aucun paiement n'est demandé sur le site.{% endif %}
 {% endif %}
 
 Un empêchement ? Annulez votre inscription pour libérer la place : {{ cancelUrl }}

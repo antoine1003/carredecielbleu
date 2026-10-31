@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Workshop;
 
+use App\Entity\Registration;
 use App\Entity\Workshop;
 use App\Entity\WorkshopSession;
 use App\Enum\SessionStatus;
@@ -133,6 +134,7 @@ final readonly class WorkshopOverview
             fillPercent: $capacity > 0 ? min(100, (int) round($registered * 100 / $capacity)) : 0,
             canConfirm: $canConfirm,
             othersToNotify: \count(array_diff(array_unique($others), $mine)),
+            depositsPaid: \count(array_filter($session->getRegistrations()->toArray(), static fn (Registration $r): bool => $r->isDepositPaid())),
         );
     }
 

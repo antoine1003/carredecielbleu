@@ -1,0 +1,21 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{# Message pour l'artisane : une personne d'une date confirmée vient d'annuler. #}
+
+{% block subject %}Annulation : {{ registration.firstName }} {{ registration.lastName }}{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 16px;"><strong>{{ registration.firstName }} {{ registration.lastName }}</strong> ({{ registration.email }}{% if registration.phone %}, {{ registration.phone }}{% endif %}) vient d'annuler son inscription à l'atelier <strong>« {{ workshop.title }} »</strong> :</p>
+    <p style="margin:0 0 16px; padding:16px; background:{{ mail.mist }}; border-radius:8px;">
+        {{ include('emails/workshop/_session.html.twig') }}
+    </p>
+    {% if depositPaid and refundable %}
+        <p style="margin:0 0 16px; padding:16px; border:2px solid {{ mail.ink }}; border-radius:8px;"><strong>Acompte à rembourser :</strong> l'acompte de {{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }} avait été reçu et l'annulation est faite dans le délai. Remboursez-le depuis SumUp (historique des transactions, puis « Rembourser »).</p>
+    {% elseif depositPaid %}
+        <p style="margin:0 0 16px;">L'acompte avait été reçu. L'annulation est faite moins de {{ deposit_policy().refundDaysBefore }} jours avant l'atelier : selon vos conditions, l'acompte reste acquis.</p>
+    {% else %}
+        <p style="margin:0 0 16px;">Aucun acompte n'avait été reçu : il n'y a rien à rembourser.</p>
+    {% endif %}
+    <p style="margin:0 0 16px;">Une place s'est libérée sur cette date.</p>
+    <p style="margin:0;"><a href="{{ adminUrl }}" style="color:{{ mail.link }};">Voir le suivi de l'atelier</a></p>
+{% endblock %}

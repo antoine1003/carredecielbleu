@@ -1,0 +1,26 @@
+{#
+    Acompte à payer (email de confirmation et relance). Variables : workshop, session.
+    Couleurs écrites en dur : les clients mail ignorent les variables CSS (voir _layout).
+#}
+{% set policy = deposit_policy() %}
+{% set deadline = policy.paymentDeadline(session) %}
+{% set amount = (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') %}
+{% set terms = site_settings().cancellationTerms|trim %}
+<div style="margin:0 0 16px; padding:16px; border:2px solid {{ mail.ink }}; border-radius:8px;">
+    <p style="margin:0 0 12px;"><strong>Pour valider votre place : acompte de {{ amount }}</strong>{% if deadline %}, à régler avant le {{ deadline|format_date('long', locale: 'fr') }}{% endif %}.</p>
+    {% if workshop.depositUrl %}
+        <p style="margin:0 0 12px;">
+            <a href="{{ workshop.depositUrl }}" style="display:inline-block; padding:12px 20px; border-radius:6px; background:{{ mail.ink }}; color:{{ mail.white }}; font-weight:bold; text-decoration:none;">Payer l'acompte de {{ amount }} sur SumUp</a>
+        </p>
+    {% else %}
+        <p style="margin:0 0 12px;">Je vous envoie très vite le lien de paiement.</p>
+    {% endif %}
+    <p style="margin:0; font-size:14px; color:{{ mail.muted }};">
+        {% if policy.refundDaysBefore > 0 %}
+            Annulation jusqu'à {{ policy.refundDaysBefore }} jour{{ policy.refundDaysBefore > 1 ? 's' }} avant l'atelier{% if policy.refundLimit(session) %} (le {{ policy.refundLimit(session)|format_date('long', locale: 'fr') }}){% endif %} : acompte remboursé en totalité. Passé ce délai, l'acompte reste acquis.
+        {% else %}
+            Annulation jusqu'au jour de l'atelier : acompte remboursé en totalité.
+        {% endif %}
+        {% if terms %}<br>{{ terms|nl2br }}{% endif %}
+    </p>
+</div>

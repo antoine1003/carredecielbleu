@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\IsTrue;
 
 /**
  * Inscription à un atelier : une personne coche toutes les dates qui lui conviennent.
@@ -71,6 +72,14 @@ final class RegistrationType extends AbstractType
                 'required' => false,
                 'attr' => ['autocomplete' => 'off', 'tabindex' => '-1'],
             ]);
+
+        // Atelier avec acompte : les conditions d'annulation doivent être acceptées avant de s'inscrire.
+        if ($options['deposit_required']) {
+            $builder->add('acceptTerms', CheckboxType::class, [
+                'label' => 'J\'ai lu et j\'accepte les conditions d\'acompte et d\'annulation ci-dessus.',
+                'constraints' => [new IsTrue(message: 'Acceptez les conditions d\'annulation pour vous inscrire.')],
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -79,8 +88,10 @@ final class RegistrationType extends AbstractType
             ->setDefaults([
                 'data_class' => RegistrationRequest::class,
                 'csrf_token_id' => 'workshop_registration',
+                'deposit_required' => false,
             ])
             ->setRequired('sessions')
-            ->setAllowedTypes('sessions', 'array');
+            ->setAllowedTypes('sessions', 'array')
+            ->setAllowedTypes('deposit_required', 'bool');
     }
 }

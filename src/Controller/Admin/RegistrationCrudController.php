@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Entity\Registration;
 use App\Repository\RegistrationRepository;
 use App\Service\Workshop\RegistrationCsvExporter;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -20,6 +21,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Psr\Clock\ClockInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -29,6 +34,25 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class RegistrationCrudController extends AbstractCrudController
 {
+    /** Coche ou décoche « Acompte reçu » (bouton du suivi de l'atelier). */
+    #[AdminRoute('/{id}/acompte', name: 'deposit', options: ['methods' => ['POST']])]
+    public function toggleDeposit(#[MapEntity(id: 'id')] Registration $registration, Request $request, EntityManagerInterface $entityManager, ClockInterface $clock): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('deposit'.$registration->getId(), $request->request->getString('_token'))) {
+            $this->addFlash('danger', 'Le formulaire a expiré, merci de recommencer.');
+        } else {
+            $registration->setDepositPaidAt($registration->isDepositPaid() ? null : $clock->now());
+            $entityManager->flush();
+            $this->addFlash('success', \sprintf(
+                $registration->isDepositPaid() ? 'Acompte de %s %s noté comme reçu.' : 'Acompte de %s %s remis « en attente ».',
+                $registration->getFirstName(),
+                $registration->getLastName(),
+            ));
+        }
+
+        return $this->redirectToRoute('admin_workshop_planning', ['id' => $registration->getSession()?->getWorkshop()?->getId()]);
+    }
+
     public static function getEntityFqcn(): string
     {
         return Registration::class;
@@ -88,5 +112,11 @@ final class RegistrationCrudController extends AbstractCrudController
         yield BooleanField::new('showNamePublicly', 'Prénom affiché en public')->renderAsSwitch(false)
             ->setHelp('Uniquement avec l\'accord de la personne.');
         yield DateTimeField::new('createdAt', 'Inscrit le')->hideOnForm()->setFormat('dd/MM/yyyy HH:mm');
+
+        yield FormField::addFieldset('Acompte', 'fa fa-euro-sign');
+        yield DateTimeField::new('depositPaidAt', 'Acompte reçu le')->setFormat('dd/MM/yyyy')->setRequired(false)
+            ->setHelp('Vide = pas encore reçu. Le plus simple : la case « Acompte reçu » du suivi de l\'atelier.');
+        yield DateTimeField::new('termsAcceptedAt', 'Conditions d\'annulation acceptées le')->hideOnIndex()
+            ->setDisabled()->setFormat('dd/MM/yyyy HH:mm');
     }
 }

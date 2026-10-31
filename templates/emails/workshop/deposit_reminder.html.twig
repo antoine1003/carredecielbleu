@@ -1,0 +1,14 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block subject %}Atelier « {{ workshop.title }} » : votre acompte{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 16px;">Bonjour {{ firstName }},</p>
+    <p style="margin:0 0 16px;">Petit rappel : votre place à l'atelier <strong>« {{ workshop.title }} »</strong> sera définitivement réservée à réception de votre acompte.</p>
+    <p style="margin:0 0 16px; padding:16px; background:{{ mail.mist }}; border-radius:8px;">
+        {{ include('emails/workshop/_session.html.twig') }}
+    </p>
+    {{ include('emails/workshop/_deposit.html.twig') }}
+    <p style="margin:0 0 16px;">Vous avez déjà payé ? Merci, et ne tenez pas compte de ce message. Vous ne pouvez plus venir ? <a href="{{ cancelUrl }}" style="color:{{ mail.link }};">Annulez votre inscription</a> pour libérer la place.</p>
+    <p style="margin:0;">À bientôt,<br>{{ site_settings().siteName }}</p>
+{% endblock %}

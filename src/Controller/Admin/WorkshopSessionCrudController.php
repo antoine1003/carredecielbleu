@@ -6,6 +6,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\WorkshopSession;
 use App\Enum\SessionStatus;
+use App\Service\Workshop\DepositReminder;
 use App\Service\Workshop\SessionConfirmationService;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -56,6 +57,23 @@ final class WorkshopSessionCrudController extends AbstractCrudController
         }
 
         return $this->redirectToRoute('admin_workshop_planning', ['id' => $workshopId]);
+    }
+
+    /** Relance par email les personnes de cette date dont l'acompte n'est pas arrivé. */
+    #[AdminRoute('/{id}/relancer-acomptes', name: 'deposit_reminders', options: ['methods' => ['POST']])]
+    public function remindDeposits(#[MapEntity(id: 'id')] WorkshopSession $session, Request $request, DepositReminder $reminder): RedirectResponse
+    {
+        if (!$this->isCsrfTokenValid('deposit_reminders'.$session->getId(), $request->request->getString('_token'))) {
+            $this->addFlash('danger', 'Le formulaire a expiré, merci de recommencer.');
+        } else {
+            $result = $reminder->remindUnpaid($session);
+            $this->addFlash('success', 0 === $result['sent'] ? 'Personne à relancer.' : \sprintf('Relance envoyée à %d personne(s).', $result['sent']));
+            if ($result['failed'] > 0) {
+                $this->addFlash('warning', \sprintf('%d relance(s) n\'ont pas pu être envoyées : vérifiez la configuration d\'envoi des emails.', $result['failed']));
+            }
+        }
+
+        return $this->redirectToRoute('admin_workshop_planning', ['id' => $session->getWorkshop()?->getId()]);
     }
 
     public function configureCrud(Crud $crud): Crud

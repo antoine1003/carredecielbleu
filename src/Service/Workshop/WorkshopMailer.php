@@ -6,6 +6,7 @@ namespace App\Service\Workshop;
 
 use App\Entity\Registration;
 use App\Entity\WorkshopSession;
+use App\Service\SiteSettingsProvider;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -24,6 +25,7 @@ final readonly class WorkshopMailer
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urls,
         private LoggerInterface $logger,
+        private SiteSettingsProvider $settings,
         #[Autowire('%env(MAIL_FROM_ADDRESS)%')]
         private string $fromAddress,
         #[Autowire('%env(MAIL_FROM_NAME)%')]
@@ -90,6 +92,48 @@ final readonly class WorkshopMailer
                 'otherDatesCancelled' => $otherDatesCancelled,
                 'workshopUrl' => $this->urls->generate('app_workshop', ['slug' => $confirmed->getWorkshop()?->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL),
                 'cancelUrl' => $this->cancelUrl($registration),
+            ],
+        );
+    }
+
+    /** Relance : l'acompte n'est pas encore arrivé. */
+    public function sendDepositReminder(Registration $registration): bool
+    {
+        $session = $registration->getSession();
+
+        return $this->send(
+            (string) $registration->getEmail(),
+            'Atelier « '.$session?->getWorkshop()?->getTitle().' » : votre acompte',
+            'emails/workshop/deposit_reminder',
+            [
+                'firstName' => $registration->getFirstName(),
+                'session' => $session,
+                'workshop' => $session?->getWorkshop(),
+                'cancelUrl' => $this->cancelUrl($registration),
+            ],
+        );
+    }
+
+    /**
+     * Prévient l'artisane qu'une personne d'une date confirmée a annulé (acompte à rembourser ou conservé).
+     * Appelé avant la suppression de l'inscription : les informations sont copiées dans le message.
+     */
+    public function sendCancellationNotice(Registration $registration, bool $depositPaid, bool $refundable): bool
+    {
+        $session = $registration->getSession();
+        $to = $this->settings->get()->getContactEmail() ?? $this->fromAddress;
+
+        return $this->send(
+            $to,
+            'Annulation : '.$registration->getFirstName().' '.$registration->getLastName().' (« '.$session?->getWorkshop()?->getTitle().' »)',
+            'emails/workshop/cancellation_notice',
+            [
+                'registration' => $registration,
+                'session' => $session,
+                'workshop' => $session?->getWorkshop(),
+                'depositPaid' => $depositPaid,
+                'refundable' => $refundable,
+                'adminUrl' => $this->urls->generate('admin_workshop_planning', ['id' => $session?->getWorkshop()?->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             ],
         );
     }

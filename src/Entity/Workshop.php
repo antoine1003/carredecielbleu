@@ -84,6 +84,17 @@ class Workshop
     #[Assert\Length(max: 500)]
     private ?string $videoUrl = null;
 
+    /** Acompte demandé une fois la date confirmée, en centimes ; null ou 0 = pas d'acompte. */
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero]
+    private ?int $depositCents = null;
+
+    /** Lien SumUp pour payer l'acompte (article de la boutique en ligne SumUp ou lien de paiement). */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Url(protocols: ['https'], requireTld: true, message: 'Indiquez une adresse complète commençant par https://')]
+    #[Assert\Length(max: 500)]
+    private ?string $depositUrl = null;
+
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
@@ -262,6 +273,30 @@ class Workshop
     public function setVideoUrl(?string $videoUrl): static
     {
         $this->videoUrl = $videoUrl;
+
+        return $this;
+    }
+
+    public function getDepositCents(): ?int
+    {
+        return $this->depositCents;
+    }
+
+    public function setDepositCents(?int $depositCents): static
+    {
+        $this->depositCents = $depositCents;
+
+        return $this;
+    }
+
+    public function getDepositUrl(): ?string
+    {
+        return $this->depositUrl;
+    }
+
+    public function setDepositUrl(?string $depositUrl): static
+    {
+        $this->depositUrl = $depositUrl;
 
         return $this;
     }

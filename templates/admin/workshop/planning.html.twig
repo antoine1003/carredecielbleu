@@ -34,19 +34,50 @@
                     {{ when.hours(c.session) }}{% if c.session.effectiveLocation %} · {{ c.session.effectiveLocation }}{% endif %}
                     · <strong>{{ c.registered }} participant{{ c.registered > 1 ? 's' }}</strong> sur {{ c.capacity }} places
                 </p>
+                {% set policy = deposit_policy() %}
+                {% set with_deposit = policy.isRequired(workshop) %}
+                {% set unpaid = c.registered - c.depositsPaid %}
+                {% if with_deposit and c.registered > 0 %}
+                    <p class="ws-banner__meta">
+                        <i class="fa fa-euro-sign" aria-hidden="true"></i>
+                        <strong>{{ c.depositsPaid }} acompte{{ c.depositsPaid > 1 ? 's' }} reçu{{ c.depositsPaid > 1 ? 's' }} sur {{ c.registered }}</strong>
+                        {% if unpaid > 0 and policy.paymentDeadline(c.session) %} · à payer avant le {{ policy.paymentDeadline(c.session)|format_date(pattern: 'EEEE d MMMM', locale: 'fr') }}{% endif %}
+                        {% if not workshop.depositUrl %} · <span class="text-danger">lien de paiement SumUp manquant : <a href="{{ path('admin_workshop_edit', {entityId: workshop.id}) }}#tab-infos-pratiques">l'ajouter</a></span>{% endif %}
+                    </p>
+                {% endif %}
                 {% if c.session.registrations is not empty %}
                     <ul class="ws-people ws-people--contacts">
                         {% for r in c.session.registrations %}
                             <li>
                                 <a href="{{ path('admin_registration_edit', {entityId: r.id}) }}">{{ r.firstName }} {{ r.lastName }}</a>
                                 <span>{{ r.email }}{% if r.phone %} · {{ r.phone }}{% endif %}</span>
+                                {% if with_deposit %}
+                                    {% if r.depositPaid %}
+                                        <twig:ea:Badge color="success" icon="fa fa-check">Acompte reçu le {{ r.depositPaidAt|format_date(pattern: 'd MMM', locale: 'fr') }}</twig:ea:Badge>
+                                    {% elseif policy.isLate(r) %}
+                                        <twig:ea:Badge color="danger">Acompte en retard</twig:ea:Badge>
+                                    {% else %}
+                                        <twig:ea:Badge color="warning">Acompte en attente</twig:ea:Badge>
+                                    {% endif %}
+                                    {% if r.depositReminderSentAt and not r.depositPaid %}<span>relancé le {{ r.depositReminderSentAt|format_date(pattern: 'd MMM', locale: 'fr') }}</span>{% endif %}
+                                    <form method="post" action="{{ path('admin_registration_deposit', {id: r.id}) }}" class="ws-deposit-toggle">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('deposit' ~ r.id) }}">
+                                        <button type="submit" class="btn btn-sm {{ r.depositPaid ? 'btn-link' : 'btn-secondary' }}">{{ r.depositPaid ? 'Annuler' : 'Acompte reçu' }}</button>
+                                    </form>
+                                {% endif %}
                             </li>
                         {% endfor %}
                     </ul>
-                    <p class="ws-banner__actions">
+                    <div class="ws-banner__actions">
                         <a class="btn btn-primary" href="mailto:?bcc={{ c.session.registrations|map(r => r.email)|join(',')|url_encode }}"><i class="fa fa-envelope"></i> Écrire aux participants</a>
+                        {% if with_deposit and unpaid > 0 %}
+                            <form method="post" action="{{ path('admin_workshop_session_deposit_reminders', {id: c.session.id}) }}" onsubmit="return confirm('Envoyer un email de relance aux {{ unpaid }} personne(s) dont l\'acompte n\'est pas arrivé ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('deposit_reminders' ~ c.session.id) }}">
+                                <button type="submit" class="btn btn-secondary"><i class="fa fa-bell"></i> Relancer {{ unpaid > 1 ? 'les ' ~ unpaid ~ ' personnes' : 'la personne' }} sans acompte</button>
+                            </form>
+                        {% endif %}
                         <a class="btn btn-secondary" href="{{ path('admin_workshop_export', {id: workshop.id}) }}"><i class="fa fa-file-csv"></i> Télécharger la liste</a>
-                    </p>
+                    </div>
                 {% endif %}
             </div>
         </section>
@@ -161,7 +192,7 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('confirm_session' ~ outerScope.s.session.id) }}">
                         <p>Voici ce qui va se passer :</p>
                         <ul>
-                            <li><strong>{{ when.people(outerScope.s.registered)|capitalize }}</strong> inscrite{{ outerScope.s.registered > 1 ? 's' }} à cette date {{ outerScope.s.registered > 1 ? 'recevront' : 'recevra' }} un email : l'atelier est confirmé.</li>
+                            <li><strong>{{ when.people(outerScope.s.registered)|capitalize }}</strong> inscrite{{ outerScope.s.registered > 1 ? 's' }} à cette date {{ outerScope.s.registered > 1 ? 'recevront' : 'recevra' }} un email : l'atelier est confirmé.{% if deposit_policy().isRequired(outerScope.workshop) %} Il contiendra le lien pour payer l'acompte de {{ (outerScope.workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}{% if not outerScope.workshop.depositUrl %} <strong class="text-danger">(lien SumUp pas encore renseigné sur l'atelier)</strong>{% endif %}.{% endif %}</li>
                             {% if outerScope.s.othersToNotify > 0 %}
                                 <li><strong>{{ when.people(outerScope.s.othersToNotify)|capitalize }}</strong> inscrite{{ outerScope.s.othersToNotify > 1 ? 's' }} seulement à d'autres dates {{ outerScope.s.othersToNotify > 1 ? 'recevront' : 'recevra' }} un email pour {{ outerScope.s.othersToNotify > 1 ? 'les' : 'la' }} prévenir.</li>
                             {% endif %}

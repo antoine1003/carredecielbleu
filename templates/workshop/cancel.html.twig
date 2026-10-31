@@ -13,6 +13,15 @@
             {% if registration %}
                 <p>Vous êtes inscrit·e à l'atelier <strong>« {{ registration.session.workshop.title }} »</strong> :</p>
                 <p class="notice">{{ ui.session_when(registration.session) }}{% if registration.session.effectiveLocation %}<br>{{ registration.session.effectiveLocation }}{% endif %}</p>
+                {% set policy = deposit_policy() %}
+                {% if policy.isExpected(registration) and registration.depositPaid %}
+                    {% set amount = (registration.session.workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') %}
+                    {% if policy.isRefundableNow(registration.session) %}
+                        <p class="deposit-terms">Vous annulez plus de {{ policy.refundDaysBefore }} jours avant l'atelier : votre acompte de {{ amount }} vous sera remboursé.</p>
+                    {% else %}
+                        <p class="deposit-terms">L'atelier a lieu dans moins de {{ policy.refundDaysBefore }} jours : selon les conditions d'annulation acceptées à l'inscription, votre acompte de {{ amount }} ne sera pas remboursé.</p>
+                    {% endif %}
+                {% endif %}
                 <form method="post" action="{{ path('app_workshop_cancel', {token: registration.cancelToken}) }}">
                     <input type="hidden" name="_token" value="{{ csrf_token('workshop_cancel' ~ registration.cancelToken) }}">
                     <button class="btn btn--primary" type="submit">Annuler mon inscription à cette date</button>

@@ -37,4 +37,7 @@ final class RegistrationRequest
 
     #[Assert\IsTrue(message: 'Votre accord est nécessaire pour enregistrer l\'inscription.')]
     public bool $consent = false;
+
+    /** Conditions d'annulation acceptées (champ présent seulement pour un atelier avec acompte). */
+    public bool $acceptTerms = false;
 }

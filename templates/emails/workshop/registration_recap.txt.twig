@@ -10,7 +10,9 @@ Merci pour votre inscription à l'atelier « {{ workshop.title }} ». Vous avez 
 {% endfor %}
 
 Dès que la date de l'atelier sera fixée, vous recevrez un email de confirmation.
-{% if workshop.priceInfo %}Tarif : {{ workshop.priceInfo }}. Aucun paiement n'est demandé sur le site.
+{% if deposit_policy().isRequired(workshop) %}À ce moment-là, un acompte de {{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }} vous sera demandé pour valider votre place (paiement en ligne sur SumUp).
+{% endif %}
+{% if workshop.priceInfo %}Tarif : {{ workshop.priceInfo }}.{% if not deposit_policy().isRequired(workshop) %} Aucun paiement n'est demandé sur le site.{% endif %}
 {% endif %}
 
 À bientôt,

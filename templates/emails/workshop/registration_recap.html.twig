@@ -14,6 +14,9 @@
         {% endfor %}
     </ul>
     <p style="margin:0 0 16px;">Dès que la date de l'atelier sera fixée, vous recevrez un email de confirmation.</p>
-    {% if workshop.priceInfo %}<p style="margin:0 0 16px;">Tarif : {{ workshop.priceInfo }}. Aucun paiement n'est demandé sur le site.</p>{% endif %}
+    {% if deposit_policy().isRequired(workshop) %}
+        <p style="margin:0 0 16px;">À ce moment-là, un acompte de {{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }} vous sera demandé pour valider votre place (paiement en ligne sur SumUp).</p>
+    {% endif %}
+    {% if workshop.priceInfo %}<p style="margin:0 0 16px;">Tarif : {{ workshop.priceInfo }}.{% if not deposit_policy().isRequired(workshop) %} Aucun paiement n'est demandé sur le site.{% endif %}</p>{% endif %}
     <p style="margin:0;">À bientôt,<br>{{ site_settings().siteName }}</p>
 {% endblock %}

@@ -63,6 +63,18 @@ class Registration
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    /** Acceptation des conditions d'annulation (ateliers avec acompte), preuve horodatée. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $termsAcceptedAt = null;
+
+    /** Acompte reçu (coché par l'artisane quand le paiement SumUp est arrivé). */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $depositPaidAt = null;
+
+    /** Dernière relance envoyée pour l'acompte. */
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $depositReminderSentAt = null;
+
     public function __construct(?string $submissionId = null)
     {
         $this->cancelToken = bin2hex(random_bytes(32));
@@ -173,5 +185,46 @@ class Registration
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getTermsAcceptedAt(): ?\DateTimeImmutable
+    {
+        return $this->termsAcceptedAt;
+    }
+
+    public function setTermsAcceptedAt(?\DateTimeImmutable $termsAcceptedAt): static
+    {
+        $this->termsAcceptedAt = $termsAcceptedAt;
+
+        return $this;
+    }
+
+    public function getDepositPaidAt(): ?\DateTimeImmutable
+    {
+        return $this->depositPaidAt;
+    }
+
+    public function setDepositPaidAt(?\DateTimeImmutable $depositPaidAt): static
+    {
+        $this->depositPaidAt = $depositPaidAt;
+
+        return $this;
+    }
+
+    public function isDepositPaid(): bool
+    {
+        return null !== $this->depositPaidAt;
+    }
+
+    public function getDepositReminderSentAt(): ?\DateTimeImmutable
+    {
+        return $this->depositReminderSentAt;
+    }
+
+    public function setDepositReminderSentAt(?\DateTimeImmutable $depositReminderSentAt): static
+    {
+        $this->depositReminderSentAt = $depositReminderSentAt;
+
+        return $this;
     }
 }

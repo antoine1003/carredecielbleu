@@ -103,5 +103,15 @@ final class SiteSettingCrudController extends AbstractCrudController
             ->setHelp('Dans Brevo : Contacts › Listes, le numéro (ID) de la liste qui reçoit les inscriptions.');
         yield TextField::new('newsletterTitle', 'Titre du bandeau')->setColumns('col-12 col-md-6');
         yield TextareaField::new('newsletterText', 'Texte du bandeau')->setNumOfRows(2)->setColumns('col-12');
+
+        yield FormField::addTab('Ateliers', 'fa fa-palette')
+            ->setHelp('Règles de l\'acompte, communes à tous les ateliers. Le montant et le lien de paiement SumUp se règlent sur chaque atelier.');
+        yield IntegerField::new('depositPaymentDays', 'Délai pour payer l\'acompte (jours)')->setColumns('col-12 col-md-6')
+            ->setHelp('Compté à partir de la confirmation de la date. Ex. : 5');
+        yield IntegerField::new('refundDaysBefore', 'Annulation remboursée jusqu\'à (jours avant l\'atelier)')->setColumns('col-12 col-md-6')
+            ->setHelp('Ex. : 7 = acompte remboursé si la personne annule au moins 7 jours avant ; ensuite, il reste acquis.');
+        yield TextareaField::new('cancellationTerms', 'Conditions complémentaires')->setNumOfRows(3)->setColumns('col-12')
+            ->setRequired(false)
+            ->setHelp('Affichées avec la règle de remboursement (page de l\'atelier et emails). Faites-les relire si besoin (comptable, CMA).');
     }
 }

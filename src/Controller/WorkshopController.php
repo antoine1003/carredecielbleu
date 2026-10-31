@@ -9,6 +9,7 @@ use App\Form\RegistrationType;
 use App\Repository\RegistrationRepository;
 use App\Repository\WorkshopRepository;
 use App\Service\AntiSpam\AltchaGuard;
+use App\Service\Workshop\DepositPolicy;
 use App\Service\Workshop\RegistrationRequest;
 use App\Service\Workshop\RegistrationService;
 use App\Service\Workshop\SessionAvailability;
@@ -28,6 +29,7 @@ final class WorkshopController extends AbstractController
         private readonly WorkshopRepository $workshops,
         private readonly SessionAvailability $availability,
         private readonly ClockInterface $clock,
+        private readonly DepositPolicy $deposit,
     ) {
     }
 
@@ -57,7 +59,10 @@ final class WorkshopController extends AbstractController
         ));
 
         $data = new RegistrationRequest();
-        $form = $this->createForm(RegistrationType::class, $data, ['sessions' => $openSessions]);
+        $form = $this->createForm(RegistrationType::class, $data, [
+            'sessions' => $openSessions,
+            'deposit_required' => $this->deposit->isRequired($workshop),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
@@ -116,11 +121,17 @@ final class WorkshopController extends AbstractController
 
                 return $this->redirectToRoute('app_workshop_cancel', ['token' => $token]);
             }
-            $session = $registrations->cancel($registration);
+            $result = $registrations->cancel($registration);
+            $session = $result->session;
             $this->addFlash('success', \sprintf(
-                'Votre inscription à l\'atelier « %s » du %s est annulée, et vos coordonnées pour cette date sont supprimées. Merci de m\'avoir prévenue.',
+                'Votre inscription à l\'atelier « %s » du %s est annulée, et vos coordonnées pour cette date sont supprimées. Merci de m\'avoir prévenue.%s',
                 $session->getWorkshop()?->getTitle(),
                 $session->getStartsAt()?->format('d/m/Y à H:i'),
+                match (true) {
+                    $result->refundDue => ' Votre acompte vous sera remboursé dans les prochains jours.',
+                    $result->depositPaid => ' Comme convenu dans les conditions d\'annulation, l\'acompte reste acquis.',
+                    default => '',
+                },
             ));
 
             // Redirection après POST (Turbo l'exige, et un rechargement ne renvoie pas le formulaire).

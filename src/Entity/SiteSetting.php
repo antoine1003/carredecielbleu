@@ -83,6 +83,23 @@ class SiteSetting
     #[Assert\Length(max: 300)]
     private string $newsletterText = '[Nouvelles créations, dates des ateliers… Texte d\'invitation à écrire par l\'artisane]';
 
+    // ---------- Ateliers : acompte et annulation (montant et lien SumUp réglés sur chaque atelier) ----------
+
+    /** Jours laissés pour payer l'acompte après la confirmation de la date. */
+    #[ORM\Column]
+    #[Assert\Range(min: 1, max: 30)]
+    private int $depositPaymentDays = 5;
+
+    /** Annulation remboursée jusqu'à ce nombre de jours avant l'atelier ; au-delà, l'acompte est conservé. */
+    #[ORM\Column]
+    #[Assert\Range(min: 0, max: 60)]
+    private int $refundDaysBefore = 7;
+
+    /** Conditions complémentaires, affichées avec la règle de remboursement. */
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\Length(max: 2000)]
+    private string $cancellationTerms = 'Si l\'atelier est annulé de mon fait, l\'acompte est remboursé en totalité.';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -240,6 +257,42 @@ class SiteSetting
     public function setNewsletterText(?string $newsletterText): static
     {
         $this->newsletterText = (string) $newsletterText;
+
+        return $this;
+    }
+
+    public function getDepositPaymentDays(): int
+    {
+        return $this->depositPaymentDays;
+    }
+
+    public function setDepositPaymentDays(?int $depositPaymentDays): static
+    {
+        $this->depositPaymentDays = (int) $depositPaymentDays;
+
+        return $this;
+    }
+
+    public function getRefundDaysBefore(): int
+    {
+        return $this->refundDaysBefore;
+    }
+
+    public function setRefundDaysBefore(?int $refundDaysBefore): static
+    {
+        $this->refundDaysBefore = (int) $refundDaysBefore;
+
+        return $this;
+    }
+
+    public function getCancellationTerms(): string
+    {
+        return $this->cancellationTerms;
+    }
+
+    public function setCancellationTerms(?string $cancellationTerms): static
+    {
+        $this->cancellationTerms = (string) $cancellationTerms;
 
         return $this;
     }

@@ -23,10 +23,12 @@
                         {{ include('partials/_gallery.html.twig', {photos: workshop.images, label: workshop.title, sizes: '(min-width: 64rem) 32rem, 92vw'}) }}
                     </div>
                 {% endif %}
-                {% if workshop.duration or workshop.priceInfo or workshop.defaultLocation %}
+                {% set deposit_required = deposit_policy().isRequired(workshop) %}
+                {% if workshop.duration or workshop.priceInfo or workshop.defaultLocation or deposit_required %}
                     <dl class="specs">
                         {% if workshop.duration %}<div><dt>Durée</dt><dd>{{ workshop.duration }}</dd></div>{% endif %}
                         {% if workshop.priceInfo %}<div><dt>Tarif</dt><dd>{{ workshop.priceInfo }}</dd></div>{% endif %}
+                        {% if deposit_required %}<div><dt>Acompte</dt><dd>{{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}, demandé une fois la date confirmée</dd></div>{% endif %}
                         {% if workshop.defaultLocation %}<div><dt>Lieu</dt><dd>{{ workshop.defaultLocation }}</dd></div>{% endif %}
                     </dl>
                 {% endif %}
@@ -36,7 +38,7 @@
                 {% if workshop.videoUrl %}
                     {{ include('workshop/_video.html.twig', {url: workshop.videoUrl, title: workshop.title}) }}
                 {% endif %}
-                <p class="product__note">Aucun paiement n'est demandé sur le site.</p>
+                <p class="product__note">{{ deposit_required ? 'L\'acompte se règle en ligne sur SumUp, une fois la date confirmée.' : 'Aucun paiement n\'est demandé sur le site.' }}</p>
             </div>
 
             <section class="workshop__register" aria-labelledby="inscription-titre" id="inscription">
@@ -89,6 +91,11 @@
                         {{ ui.checkbox(form.showNamePublicly) }}
                         {{ ui.checkbox(form.consent) }}
                         <p class="field__help">Vos coordonnées servent uniquement à organiser l'atelier et sont supprimées après. <a href="{{ path('app_page', {slug: 'politique-de-confidentialite'}) }}">Politique de confidentialité</a>.</p>
+
+                        {% if form.acceptTerms is defined %}
+                            {{ include('workshop/_deposit_terms.html.twig') }}
+                            {{ ui.checkbox(form.acceptTerms) }}
+                        {% endif %}
 
                         <div class="honeypot" aria-hidden="true">
                             {{ form_label(form.website) }}

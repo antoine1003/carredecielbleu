@@ -666,11 +666,33 @@
         scroll-behavior: auto;
     }
 
+    /* Sans mouvement : la photo s'éclaire et une lueur dorée apparaît en fondu */
     .gallery__zoom::after {
-        display: none;
+        transform: none;
+        opacity: 0;
+        background: radial-gradient(
+            circle at 30% 20%,
+            color-mix(in srgb, var(--palette-blanc) 35%, transparent),
+            color-mix(in srgb, var(--palette-ambre) 15%, transparent) 45%,
+            transparent 75%
+        );
+        transition: opacity 300ms ease;
+    }
+
+    .gallery__zoom img {
+        transition: filter 300ms ease;
     }
 
     .gallery__zoom:hover img {
         transform: none;
+        filter: brightness(1.06) saturate(1.12);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
+    .gallery__zoom:hover::after {
+        transform: none;
+        opacity: 1;
+        transition: opacity 300ms ease;
     }
 }

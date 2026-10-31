@@ -5,6 +5,7 @@
     <span class="ws-list-status__text">
         {% if summary.confirmed %}
             {{ when.short(summary.confirmed.session.startsAt) }} · {{ summary.confirmed.registered }} / {{ summary.confirmed.capacity }} places
+            {%- if summary.confirmedList|length > 1 %} · et {{ summary.confirmedList|length - 1 }} autre{{ summary.confirmedList|length > 2 ? 's' }} date{{ summary.confirmedList|length > 2 ? 's' }} retenue{{ summary.confirmedList|length > 2 ? 's' }}{% endif %}
         {% elseif summary.state.value == 'to_decide' %}
             {{ when.people(summary.peopleCount) }} inscrite{{ summary.peopleCount > 1 ? 's' }} sur {{ summary.upcoming|length }} date{{ summary.upcoming|length > 1 ? 's' }}
         {% elseif summary.state.value == 'waiting' %}

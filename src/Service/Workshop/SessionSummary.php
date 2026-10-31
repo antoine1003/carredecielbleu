@@ -17,7 +17,7 @@ final readonly class SessionSummary
         public int $capacity,
         /** Remplissage de 0 à 100, pour la jauge. */
         public int $fillPercent,
-        /** Date à venir, ouverte ou complète : on peut la retenir. */
+        /** Date à venir, non encore retenue (ouverte, complète ou annulée) : on peut la retenir. */
         public bool $canConfirm,
         /** Inscrits d'autres dates qui recevraient l'email d'information si on retenait celle-ci. */
         public int $othersToNotify,

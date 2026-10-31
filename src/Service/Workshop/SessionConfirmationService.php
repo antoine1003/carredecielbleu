@@ -11,7 +11,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Clock\ClockInterface;
 
 /**
- * Confirmation par l'artisane de la date retenue pour un atelier :
+ * Confirmation par l'artisane d'une date retenue pour un atelier (plusieurs dates peuvent être
+ * retenues : un second groupe, par exemple ; une date annulée à venir peut aussi être retenue) :
  * - la date passe en « confirmée » ;
  * - ses inscrits reçoivent un email de confirmation ;
  * - les inscrits des autres dates (et seulement d'elles) reçoivent un email d'information ;
@@ -36,9 +37,6 @@ final readonly class SessionConfirmationService
         $workshop = $session->getWorkshop() ?? throw new \LogicException('Date sans atelier.');
         if (SessionStatus::Confirmed === $session->getStatus()) {
             throw new \DomainException('Cette date est déjà confirmée : les emails ont déjà été envoyés.');
-        }
-        if (SessionStatus::Cancelled === $session->getStatus()) {
-            throw new \DomainException('Cette date est annulée : rouvrez-la avant de la confirmer.');
         }
         $now = $this->clock->now();
         if (null === $session->getStartsAt() || $session->getStartsAt() <= $now) {

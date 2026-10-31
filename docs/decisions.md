@@ -153,3 +153,10 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Les personnes qui n'étaient pas disponibles à la date retenue gardent leurs autres inscriptions (email « la date est fixée » inchangé).
 - Correction au passage : les inscrits d'une date déjà confirmée ne reçoivent plus l'email d'information si une autre date est confirmée (cas impossible depuis le suivi actuel, qui ne propose plus « Retenir » une fois une date retenue ; vérifié par relecture et PHPStan seulement).
 - Vérifié sur un atelier de test (supprimé ensuite) : décompte annoncé dans la fenêtre, inscriptions retirées en base, emails (mention de retrait pour les confirmés, information pour les autres), message de résultat.
+
+## 2026-10-31 — Plusieurs groupes pour un même atelier
+
+- Une fois une date retenue, les autres dates à venir non retenues (ouvertes, complètes ou annulées) gardent leur bouton « Retenir cette date » : l'artisane peut faire un second groupe. Une date annulée retenue redevient une date confirmée (la fenêtre le signale).
+- Suivi : un bandeau par date retenue (« Groupe 1 », « Groupe 2 »… avec participants, acomptes, relance), et une invitation quand des personnes attendent sur des dates pas encore retenues. Liste et accueil : « et N autre(s) date(s) retenue(s) ».
+- Les inscrits d'une date déjà retenue ne reçoivent plus l'email d'information quand une autre date est retenue.
+- Vérifié sur un atelier de test (supprimé ensuite) : 1re date retenue en gardant les autres ouvertes (retrait du doublon, invitation affichée), 2e date retenue (deux bandeaux, seule la personne de la date restante informée, date restante annulée), ligne de la liste.

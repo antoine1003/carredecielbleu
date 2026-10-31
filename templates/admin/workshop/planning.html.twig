@@ -23,13 +23,13 @@
 <div class="ws">
 
     {# ---------- Où en est-on ? ---------- #}
-    {% if summary.confirmed %}
-        {% set c = summary.confirmed %}
-        <section class="ws-banner ws-banner--confirmed" aria-labelledby="ws-banner-title">
+    {% if summary.confirmedList is not empty %}
+        {% for c in summary.confirmedList %}
+        <section class="ws-banner ws-banner--confirmed" aria-labelledby="ws-banner-title-{{ loop.index }}">
             <div class="ws-banner__icon" aria-hidden="true"><i class="fa fa-calendar-check"></i></div>
             <div class="ws-banner__body">
-                <p class="ws-banner__kicker">L'atelier aura lieu le</p>
-                <h2 class="ws-banner__title" id="ws-banner-title">{{ when.day(c.session.startsAt)|capitalize }}</h2>
+                <p class="ws-banner__kicker">{{ summary.confirmedList|length > 1 ? 'Groupe ' ~ loop.index ~ ' : l\'atelier aura lieu le' : 'L\'atelier aura lieu le' }}</p>
+                <h2 class="ws-banner__title" id="ws-banner-title-{{ loop.index }}">{{ when.day(c.session.startsAt)|capitalize }}</h2>
                 <p class="ws-banner__meta">
                     {{ when.hours(c.session) }}{% if c.session.effectiveLocation %} · {{ c.session.effectiveLocation }}{% endif %}
                     · <strong>{{ c.registered }} participant{{ c.registered > 1 ? 's' }}</strong> sur {{ c.capacity }} places
@@ -81,6 +81,10 @@
                 {% endif %}
             </div>
         </section>
+        {% endfor %}
+        {% if summary.waitingElsewhere > 0 %}
+            <p class="ws-hint"><i class="fa fa-users" aria-hidden="true"></i> {{ when.people(summary.waitingElsewhere)|capitalize }} inscrite{{ summary.waitingElsewhere > 1 ? 's' }} à d'autres dates : vous pouvez retenir une autre date ci-dessous pour faire un groupe de plus.</p>
+        {% endif %}
     {% elseif summary.state.value == 'to_decide' %}
         <section class="ws-banner ws-banner--decide" aria-labelledby="ws-banner-title">
             <div class="ws-banner__icon" aria-hidden="true"><i class="fa fa-hand-pointer"></i></div>
@@ -172,7 +176,7 @@
                                 <twig:ea:Badge color="{{ status_colors[status] }}">{{ s.session.status.label }}</twig:ea:Badge>
                             {% endif %}
                             {% if is_top %}<span class="ws-date__hint"><i class="fa fa-star" aria-hidden="true"></i> La plus demandée</span>{% endif %}
-                            {% if s.canConfirm and not summary.confirmed %}
+                            {% if s.canConfirm %}
                                 <twig:ea:Modal:Trigger target="#ws-confirm-{{ s.session.id }}" variant="{{ is_top ? 'primary' : 'default' }}">Retenir cette date</twig:ea:Modal:Trigger>
                             {% endif %}
                             <a class="ws-date__edit" href="{{ path('admin_workshop_session_edit', {entityId: s.session.id}) }}">Modifier cette date</a>
@@ -183,7 +187,7 @@
         </section>
 
         {# Fenêtres de confirmation, une par date que l'on peut retenir #}
-        {% for s in summary.upcoming|filter(s => s.canConfirm and not summary.confirmed) %}
+        {% for s in summary.upcoming|filter(s => s.canConfirm) %}
             {% set form_id = 'ws-confirm-form-' ~ s.session.id %}
             <twig:ea:Modal id="ws-confirm-{{ s.session.id }}" size="lg" topIcon="fa fa-calendar-check" title="Retenir le {{ when.short(s.session.startsAt) }} ?">
                 <twig:block name="body">
@@ -192,6 +196,9 @@
                         <input type="hidden" name="_token" value="{{ csrf_token('confirm_session' ~ outerScope.s.session.id) }}">
                         <p>Voici ce qui va se passer :</p>
                         <ul>
+                            {% if outerScope.s.session.status.value == 'cancelled' %}
+                                <li>Cette date avait été annulée : elle redevient une date de l'atelier, confirmée.</li>
+                            {% endif %}
                             <li><strong>{{ when.people(outerScope.s.registered)|capitalize }}</strong> inscrite{{ outerScope.s.registered > 1 ? 's' }} à cette date {{ outerScope.s.registered > 1 ? 'recevront' : 'recevra' }} un email : l'atelier est confirmé.{% if deposit_policy().isRequired(outerScope.workshop) %} Il contiendra le lien pour payer l'acompte de {{ (outerScope.workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}{% if not outerScope.workshop.depositUrl %} <strong class="text-danger">(lien SumUp pas encore renseigné sur l'atelier)</strong>{% endif %}.{% endif %}</li>
                             {% if outerScope.s.registrationsToRemove > 0 %}
                                 <li>{{ outerScope.s.peopleWithOtherDates > 1 ? outerScope.s.peopleWithOtherDates ~ ' de ces personnes étaient' : '1 de ces personnes était' }} aussi inscrite{{ outerScope.s.peopleWithOtherDates > 1 ? 's' }} à d'autres dates : {{ outerScope.s.registrationsToRemove > 1 ? 'ces ' ~ outerScope.s.registrationsToRemove ~ ' inscriptions seront retirées' : 'cette inscription sera retirée' }}, ce qui libère de la place.</li>

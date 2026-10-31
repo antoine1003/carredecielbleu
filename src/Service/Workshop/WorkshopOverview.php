@@ -69,13 +69,22 @@ final readonly class WorkshopOverview
         }
         $people = [] === $emailsBySession ? [] : array_unique(array_merge(...array_values($emailsBySession)));
 
-        $confirmed = null;
+        $confirmedList = [];
         $upcomingSummaries = [];
         foreach ($upcoming as $session) {
             $summary = $this->summarize($session, $emailsBySession, true);
             $upcomingSummaries[] = $summary;
-            if (null === $confirmed && SessionStatus::Confirmed === $session->getStatus()) {
-                $confirmed = $summary;
+            if (SessionStatus::Confirmed === $session->getStatus()) {
+                $confirmedList[] = $summary;
+            }
+        }
+        $confirmed = $confirmedList[0] ?? null;
+
+        // Personnes inscrites seulement à des dates pas encore retenues (de quoi faire un autre groupe).
+        $waiting = [];
+        foreach ($upcoming as $session) {
+            if (\in_array($session->getStatus(), [SessionStatus::Open, SessionStatus::Full], true)) {
+                $waiting = array_merge($waiting, $emailsBySession[(int) $session->getId()] ?? []);
             }
         }
 
@@ -101,6 +110,8 @@ final readonly class WorkshopOverview
             workshop: $workshop,
             state: $state,
             confirmed: $confirmed,
+            confirmedList: $confirmedList,
+            waitingElsewhere: \count(array_unique($waiting)),
             mostRequested: $mostRequested,
             upcoming: $upcomingSummaries,
             past: array_map(fn (WorkshopSession $s): SessionSummary => $this->summarize($s, [], false), $past),
@@ -116,7 +127,7 @@ final readonly class WorkshopOverview
     {
         $registered = $this->availability->registeredCount($session);
         $capacity = $session->getEffectiveCapacity();
-        $canConfirm = $isUpcoming && \in_array($session->getStatus(), [SessionStatus::Open, SessionStatus::Full], true);
+        $canConfirm = $isUpcoming && SessionStatus::Confirmed !== $session->getStatus();
 
         // Personnes des autres dates (ni annulées ni déjà confirmées) qui recevraient l'email
         // d'information si l'on retenait celle-ci.

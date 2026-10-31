@@ -224,3 +224,12 @@
 .ws-people--contacts li { align-items: center; }
 .ws-deposit-toggle { display: inline; margin: 0; }
 .ws-banner__actions form { display: inline; margin: 0; }
+
+/* Suivi : invitation à retenir une autre date (second groupe) */
+.ws-hint {
+    margin: -1rem 0 0;
+    padding: 0.75rem 1rem;
+    border-radius: 0.6rem;
+    background: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text-emphasis);
+}

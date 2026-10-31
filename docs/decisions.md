@@ -124,3 +124,10 @@ Journal des décisions prises pendant le développement. Les règles durables so
 
 - Photos d'atelier : plus d'arche ni de recadrage (`object-fit: contain`), cadre aux coins arrondis qui prend les proportions de la première photo (`--gallery-ratio`, 75 % de la hauteur d'écran au plus) ; une photo d'un autre format s'affiche entière avec un fond clair. Les produits gardent l'arche.
 - Visionneuse plein écran (produits et ateliers) : fond noir légèrement transparent (`--color-overlay`, nouvelle teinte `--palette-noir`) au lieu du bleu encre.
+
+## 2026-10-31 — Logo de l'artisane
+
+- Logo fourni (vitrail rond, PNG 640 px transparent), original conservé dans `docs/brand/logo-carre-de-ciel-bleu.png`.
+- Versions web générées en WebP dans `assets/images/` : 96 px (en-tête, affiché à 44 px), 320 et 640 px (accueil, `srcset`, image LCP en `fetchpriority="high"`).
+- Remplace l'illustration « lune » de l'accueil et la petite fenêtre en ogive de l'en-tête. Texte alternatif vide : le nom du site est écrit juste à côté (en-tête) ou le logo est décoratif (accueil).
+- Piste non faite : favicon et image de partage (Open Graph) à partir du logo.

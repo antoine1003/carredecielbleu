@@ -90,6 +90,18 @@
     margin-inline: auto;
 }
 
+/* Logo de l'artisane (vitrail rond) à la place de l'illustration */
+.hero__art--logo {
+    flex: 0 1 24rem;
+    max-width: min(24rem, 75vw);
+}
+
+.hero__art--logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
 /* Éclats : formes translucides, comme la lumière projetée par un vitrail sur un mur */
 .shards {
     position: absolute;

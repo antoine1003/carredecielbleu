@@ -3,10 +3,7 @@
 <header class="site-header">
     <div class="container site-header__inner">
         <a class="brand" href="{{ path('app_home') }}"{% if route == 'app_home' %} aria-current="page"{% endif %}>
-            <svg class="brand__mark" viewBox="0 0 34 44" aria-hidden="true" focusable="false">
-                <path class="glass-art__lead glass-art__sky" d="M2 42 V17 A15 15 0 0 1 32 17 V42 Z"/>
-                <path class="glass-art__lead glass-art__none" d="M2 28 H32 M17 4 V42"/>
-            </svg>
+            <img class="brand__mark" src="{{ asset('images/logo-96.webp') }}" width="96" height="96" alt="" decoding="async">
             <span class="brand__name">{{ site_settings().siteName }}</span>
         </a>
         <nav class="site-nav" aria-label="Navigation principale">

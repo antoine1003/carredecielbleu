@@ -66,11 +66,11 @@
     --color-glass-4: var(--palette-aurore);
 
     /* ---------- 3. Polices ---------- */
-    --font-display: 'Gloock', 'Georgia', 'Times New Roman', serif;
+    --font-display: 'Alegreya', 'Georgia', 'Times New Roman', serif;
     --font-body: 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-weight-body: 400;
     --font-weight-strong: 700;
-    --font-weight-display: 400;
+    --font-weight-display: 500;
 
     /* Échelle typographique (corps 18 px, rapport ≈ 1,25, fluide entre 375 et 1280 px) */
     --step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);

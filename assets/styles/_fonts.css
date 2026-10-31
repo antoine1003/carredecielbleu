@@ -10,11 +10,11 @@
  */
 
 @font-face {
-    font-family: 'Gloock';
+    font-family: 'Alegreya';
     font-style: normal;
-    font-weight: 400;
+    font-weight: 400 900;
     font-display: swap;
-    src: url('../fonts/gloock-latin-400-normal.woff2') format('woff2');
+    src: url('../fonts/alegreya-latin-wght-normal.woff2') format('woff2-variations');
 }
 
 @font-face {

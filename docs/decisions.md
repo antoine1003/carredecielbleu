@@ -91,3 +91,8 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Déclinaisons : onglet « Prix et déclinaisons », formulaire imbriqué (`ProductVariantCrudController`, `useEntryCrudForm`), ajout, suppression, prix en euros (stocké en centimes), suivi du stock. Une déclinaison ajoutée à la main a le statut « Saisi à la main » et n'est jamais touchée par l'import.
 - Création de produit à la main réactivée : une déclinaison unique, stock non suivi par défaut.
 - Vérifié dans l'admin : modification d'un stock, ajout puis suppression d'une déclinaison, création d'un produit à la main (données de test remises en état).
+
+## 2026-10-31 — Police des titres : Alegreya
+
+- Gloock jugée peu lisible et trop serrée. Cinq propositions comparées sur de vrais titres du site (Fraunces, Young Serif, Newsreader, Alegreya, Bricolage Grotesque) : choix d'Alegreya, tracé calligraphique.
+- Version variable (graisses 400 à 900), sous-ensemble latin en woff2 (43 Ko), issue de `@fontsource-variable/alegreya` 5.3.0, licence OFL (`assets/fonts/OFL-alegreya.txt`). Titres en graisse 500, approche du h1 ramenée à -0,005em. Fichiers Gloock retirés.

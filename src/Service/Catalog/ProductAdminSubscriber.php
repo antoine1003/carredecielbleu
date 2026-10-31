@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Image;
+namespace App\Service\Catalog;
 
 use App\Entity\Product;
+use App\Service\Image\ImageProcessingException;
+use App\Service\Image\ProductImageProcessor;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -13,9 +15,9 @@ use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 
 /**
  * À l'enregistrement d'un produit dans l'admin : convertit les photos envoyées en WebP
- * et range les photos dans l'ordre affiché (la première est la photo principale).
+ * et range photos et déclinaisons dans l'ordre affiché (la première photo est la principale).
  */
-final readonly class ProductImageUploadSubscriber
+final readonly class ProductAdminSubscriber
 {
     public function __construct(
         private ProductImageProcessor $processor,
@@ -62,6 +64,11 @@ final readonly class ProductImageUploadSubscriber
                 $image->setAlt((string) $entity->getName());
             }
             $image->setPosition($position++);
+        }
+
+        $position = 0;
+        foreach ($entity->getVariants() as $variant) {
+            $variant->setPosition($position++);
         }
     }
 

@@ -32,7 +32,7 @@ class ProductImage
     private ?string $filename = null;
 
     #[ORM\Column(length: 255)]
-    /** Texte alternatif ; vide à l'envoi = nom du produit (ProductImageUploadSubscriber). */
+    /** Texte alternatif ; vide à l'envoi = nom du produit (ProductAdminSubscriber). */
     #[Assert\Length(max: 255)]
     private ?string $alt = null;
 
@@ -52,7 +52,7 @@ class ProductImage
 
     /**
      * Fichier envoyé depuis l'admin, non enregistré en base : converti en WebP par
-     * ProductImageProcessor avant l'enregistrement (ProductImageUploadSubscriber).
+     * ProductImageProcessor avant l'enregistrement (ProductAdminSubscriber).
      */
     #[Assert\Image(
         maxSize: '10M',

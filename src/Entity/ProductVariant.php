@@ -42,6 +42,7 @@ class ProductVariant
     private bool $trackInventory = true;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero]
     private int $stock = 0;
 
     #[ORM\Column]

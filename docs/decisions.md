@@ -83,3 +83,11 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Fiche produit : ruban à défilement natif (scroll-snap : glisser au doigt, flèches, miniatures, clavier), visionneuse plein écran en `<dialog>` natif (Échap, clic sur le fond, flèches du clavier). Sans JavaScript, chaque photo reste un lien vers sa grande version. Pas d'effet au survol sur la fiche (choix de la cliente). Boutique : image de la carte cliquable vers la fiche (lien masqué aux lecteurs d'écran, le titre porte le lien) et léger zoom au survol (500 ms, réduit à 250 ms mais conservé si `prefers-reduced-motion`, à la demande de la cliente).
 - Mobile : les photos prennent toute la largeur ; l'illustration provisoire (produit sans photo) garde sa largeur réduite.
 - Vérifié : upload de 3 photos par le vrai formulaire (lignes en base, 8 fichiers WebP), navigation flèches/miniatures/compteur, visionneuse (ouverture sur la bonne photo, clavier, retour du focus sur la photo regardée), 1280 px et 375 px sans débordement, produit sans photo inchangé.
+
+## 2026-10-31 — Admin produit entièrement modifiable
+
+- Demande : plus de champ affiché mais non modifiable, sauf les champs techniques. Nom, catégorie, description, référencement, prix et stock deviennent modifiables ; identifiant SumUp, état de synchronisation et dates restent en lecture seule.
+- Conséquence assumée : pour un produit synchronisé, ces champs restent la propriété de SumUp et sont remplacés au prochain import (aide sous chaque champ). Pas de verrouillage champ par champ (aurait demandé un changement de schéma).
+- Déclinaisons : onglet « Prix et déclinaisons », formulaire imbriqué (`ProductVariantCrudController`, `useEntryCrudForm`), ajout, suppression, prix en euros (stocké en centimes), suivi du stock. Une déclinaison ajoutée à la main a le statut « Saisi à la main » et n'est jamais touchée par l'import.
+- Création de produit à la main réactivée : une déclinaison unique, stock non suivi par défaut.
+- Vérifié dans l'admin : modification d'un stock, ajout puis suppression d'une déclinaison, création d'un produit à la main (données de test remises en état).

@@ -204,11 +204,12 @@
     }
 }
 
-/* Animations réduites : le zoom reste, mais sans mouvement progressif */
+/* Animations réduites : zoom conservé avec une transition courte et douce (choix de la cliente).
+   !important nécessaire pour passer devant la remise à zéro globale de base.css. */
 @media (prefers-reduced-motion: reduce) {
     .product-card__media > img,
     .product-card__media > svg {
-        transition: none;
+        transition-duration: 250ms !important;
     }
 }
 

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Entity\Product;
+use App\Entity\ProductImage;
 use App\Entity\ProductVariant;
 use App\Enum\SyncStatus;
-use App\Form\ProductImageType;
+use App\Form\ResponsiveImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -144,14 +145,14 @@ final class ProductCrudController extends AbstractCrudController
             ->setHelp('La première photo est la photo principale (liste et partage sur les réseaux). Ajoutez-en autant que vous voulez : elles défilent sur la fiche produit.');
         yield CollectionField::new('images', false)
             ->onlyOnForms()
-            ->setEntryType(ProductImageType::class)
+            ->setEntryType(ResponsiveImageType::class)
             ->setEntryIsComplex()
             ->renderExpanded()
             ->allowAdd()
             ->allowDelete()
             ->setColumns('col-12')
             ->setFormTypeOption('by_reference', false)
-            ->setFormTypeOption('entry_options', ['label' => false]);
+            ->setFormTypeOption('entry_options', ['label' => false, 'data_class' => ProductImage::class, 'alt_fallback' => 'le nom du produit']);
 
         // ---------- Onglet 4 : référencement ----------
         yield FormField::addTab('Référencement', 'fa fa-magnifying-glass')

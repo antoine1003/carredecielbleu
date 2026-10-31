@@ -96,3 +96,10 @@ Journal des décisions prises pendant le développement. Les règles durables so
 
 - Gloock jugée peu lisible et trop serrée. Cinq propositions comparées sur de vrais titres du site (Fraunces, Young Serif, Newsreader, Alegreya, Bricolage Grotesque) : choix d'Alegreya, tracé calligraphique.
 - Version variable (graisses 400 à 900), sous-ensemble latin en woff2 (43 Ko), issue de `@fontsource-variable/alegreya` 5.3.0, licence OFL (`assets/fonts/OFL-alegreya.txt`). Titres en graisse 500, approche du h1 ramenée à -0,005em. Fichiers Gloock retirés.
+
+## 2026-10-31 — Photos et vidéo des ateliers
+
+- Atelier : plusieurs photos (entité `WorkshopImage`, table `workshop_image`) et un lien vidéo (`workshop.video_url`), migration `Version20261031125355`.
+- Code photo mis en commun avec les produits : `ResponsiveImage` (interface) + `ResponsiveImageTrait` (colonnes identiques, `product_image` inchangée), `ImageProcessor` (dossier par type : `uploads/products`, `uploads/workshops`), `ImageCollectionProcessor` (conversion, texte alternatif par défaut, ordre), `ImageFileRemover`, `ResponsiveImageType`, Twig `image_attrs()`, gabarit `partials/_gallery.html.twig`.
+- Vidéo : YouTube reconnu (watch, youtu.be, shorts, embed, live ; https uniquement) et intégré en « façade » : vignette locale aux couleurs du site, lecteur `youtube-nocookie.com` créé seulement au clic. Respecte « pas de tracker tiers » tant que le visiteur ne clique pas ; mention sous la vidéo. Autre lien (Vimeo, page…) : bouton externe.
+- Vérifié : envoi de 2 photos par le formulaire admin (WebP 480/960/1600 dans `uploads/workshops/`), page publique à 1280 et 375 px sans débordement, aucune requête YouTube avant le clic, lecteur inséré au clic avec titre et focus. Lecture réelle non vérifiable dans le navigateur de test (sites externes bloqués). Produits non régressés (galerie, cartes, aperçu admin).

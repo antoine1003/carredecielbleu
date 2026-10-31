@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Service\Image;
 
-use App\Entity\ProductImage;
+use App\Entity\ResponsiveImage;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
 
 /**
- * Photos produits : vérifie le fichier envoyé, le convertit en WebP en plusieurs largeurs
- * (srcset) et le range sous public/uploads/products/{nom aléatoire}-{largeur}.webp.
+ * Photos (produits, ateliers) : vérifie le fichier envoyé, le convertit en WebP en plusieurs
+ * largeurs (srcset) et le range sous public/uploads/{dossier}/{nom aléatoire}-{largeur}.webp.
  * L'original n'est jamais conservé ni servi.
  */
-final readonly class ProductImageProcessor
+final readonly class ImageProcessor
 {
     public const array ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
     public const int MAX_BYTES = 10 * 1024 * 1024;
@@ -25,7 +25,7 @@ final readonly class ProductImageProcessor
     private const int WEBP_QUALITY = 82;
 
     public function __construct(
-        #[Autowire('%kernel.project_dir%/public/uploads/products')]
+        #[Autowire('%kernel.project_dir%/public/uploads')]
         private string $directory,
         private Filesystem $filesystem = new Filesystem(),
     ) {
@@ -36,10 +36,11 @@ final readonly class ProductImageProcessor
      *
      * @throws ImageProcessingException fichier refusé (message destiné à l'admin)
      */
-    public function process(File $file, ProductImage $image): void
+    public function process(File $file, ResponsiveImage $image): void
     {
         $source = $this->load($file);
         $previous = $image->getFilename();
+        $directory = $this->directory.'/'.$image::uploadFolder();
 
         try {
             $sourceWidth = imagesx($source);
@@ -49,7 +50,7 @@ final readonly class ProductImageProcessor
                 $widths = [$sourceWidth];
             }
 
-            $this->filesystem->mkdir($this->directory, 0o755);
+            $this->filesystem->mkdir($directory, 0o755);
             $filename = bin2hex(random_bytes(16));
             $largestHeight = $sourceHeight;
 
@@ -62,7 +63,7 @@ final readonly class ProductImageProcessor
                 imagepalettetotruecolor($resized);
                 imagealphablending($resized, true);
                 imagesavealpha($resized, true);
-                if (!imagewebp($resized, $this->path($filename, $width), self::WEBP_QUALITY)) {
+                if (!imagewebp($resized, $this->path($directory, $filename, $width), self::WEBP_QUALITY)) {
                     throw new ImageProcessingException('Impossible d\'enregistrer la photo.');
                 }
                 $largestHeight = $height;
@@ -78,23 +79,29 @@ final readonly class ProductImageProcessor
 
         // Remplacement d'une photo existante : on supprime les anciens fichiers.
         if (null !== $previous && $previous !== $filename) {
-            $this->removeFiles($previous, []);
+            $this->removeFilesIn($directory, $previous, []);
+        }
+    }
+
+    /** Supprime les fichiers WebP d'une photo (photo retirée ou supprimée). */
+    public function removeFiles(ResponsiveImage $image): void
+    {
+        if (null !== $image->getFilename()) {
+            $this->removeFilesIn($this->directory.'/'.$image::uploadFolder(), $image->getFilename(), $image->getWidths());
         }
     }
 
     /**
-     * Supprime les fichiers WebP d'une photo.
-     *
      * @param list<int> $widths largeurs connues ; vide = toutes celles trouvées sur le disque
      */
-    public function removeFiles(string $filename, array $widths): void
+    private function removeFilesIn(string $directory, string $filename, array $widths): void
     {
         if (1 !== preg_match('/^[a-f0-9]{32}$/', $filename)) {
             return;
         }
         $paths = [] === $widths
-            ? (glob($this->directory.'/'.$filename.'-*.webp') ?: [])
-            : array_map(fn (int $w): string => $this->path($filename, $w), $widths);
+            ? (glob($directory.'/'.$filename.'-*.webp') ?: [])
+            : array_map(fn (int $w): string => $this->path($directory, $filename, $w), $widths);
         $this->filesystem->remove($paths);
     }
 
@@ -148,8 +155,8 @@ final readonly class ProductImageProcessor
         return $rotated instanceof \GdImage ? $rotated : $image;
     }
 
-    private function path(string $filename, int $width): string
+    private function path(string $directory, string $filename, int $width): string
     {
-        return \sprintf('%s/%s-%d.webp', $this->directory, $filename, $width);
+        return \sprintf('%s/%s-%d.webp', $directory, $filename, $width);
     }
 }

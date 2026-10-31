@@ -18,6 +18,11 @@
         <div class="workshop">
             <div class="workshop__info stack">
                 <h1 class="product__title">{{ workshop.title }}</h1>
+                {% if workshop.images is not empty %}
+                    <div class="workshop__gallery">
+                        {{ include('partials/_gallery.html.twig', {photos: workshop.images, label: workshop.title, sizes: '(min-width: 64rem) 32rem, 92vw'}) }}
+                    </div>
+                {% endif %}
                 {% if workshop.duration or workshop.priceInfo or workshop.defaultLocation %}
                     <dl class="specs">
                         {% if workshop.duration %}<div><dt>Durée</dt><dd>{{ workshop.duration }}</dd></div>{% endif %}
@@ -27,6 +32,9 @@
                 {% endif %}
                 {% if workshop.description %}
                     <div class="prose">{{ workshop.description|sanitize_html('app.rich_text') }}</div>
+                {% endif %}
+                {% if workshop.videoUrl %}
+                    {{ include('workshop/_video.html.twig', {url: workshop.videoUrl, title: workshop.title}) }}
                 {% endif %}
                 <p class="product__note">Aucun paiement n'est demandé sur le site.</p>
             </div>

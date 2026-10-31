@@ -6,7 +6,9 @@ namespace App\Controller\Admin;
 
 use App\Entity\Registration;
 use App\Entity\Workshop;
+use App\Entity\WorkshopImage;
 use App\Entity\WorkshopSession;
+use App\Form\ResponsiveImageType;
 use App\Repository\RegistrationRepository;
 use App\Service\Workshop\RegistrationCsvExporter;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,6 +26,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -126,7 +129,25 @@ final class WorkshopCrudController extends AbstractCrudController
         yield IntegerField::new('id', 'Dates')->onlyOnIndex()->setSortable(false)
             ->formatValue(static fn ($value, Workshop $workshop): string => (string) $workshop->getSessions()->count());
 
-        // ---------- Onglet 3 : dates proposées ----------
+        // ---------- Onglet 3 : photos et vidéo ----------
+        yield FormField::addTab('Photos et vidéo', 'fa fa-images');
+        yield FormField::addFieldset('Photos', 'fa fa-camera')
+            ->setHelp('Ce qui sera réalisé, le lieu, l\'ambiance… La première photo est la photo principale. Elles défilent sur la page de l\'atelier.');
+        yield CollectionField::new('images', false)
+            ->onlyOnForms()
+            ->setEntryType(ResponsiveImageType::class)
+            ->setEntryIsComplex()
+            ->renderExpanded()
+            ->allowAdd()
+            ->allowDelete()
+            ->setColumns('col-12')
+            ->setFormTypeOption('by_reference', false)
+            ->setFormTypeOption('entry_options', ['label' => false, 'data_class' => WorkshopImage::class, 'alt_fallback' => 'le titre de l\'atelier']);
+        yield FormField::addFieldset('Vidéo', 'fa fa-video');
+        yield UrlField::new('videoUrl', 'Lien vers une vidéo')->hideOnIndex()->setColumns('col-12 col-lg-8')
+            ->setHelp('Lien YouTube (la vidéo s\'affiche dans la page, chargée seulement quand le visiteur clique) ou lien vers une autre page (affiché comme un simple lien).');
+
+        // ---------- Onglet 4 : dates proposées ----------
         yield FormField::addTab('Dates', 'fa fa-calendar-days')
             ->setHelp('Ajoutez autant de dates que vous voulez. Une date qui a déjà des inscrits ne peut pas être retirée ici : passez-la en « Annulée ».');
         yield CollectionField::new('sessions', false)

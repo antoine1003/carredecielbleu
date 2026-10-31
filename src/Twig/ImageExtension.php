@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace App\Twig;
 
 use App\Entity\Product;
-use App\Entity\ProductImage;
+use App\Entity\ResponsiveImage;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 /**
- * Attributs d'image (src, srcset, dimensions) des photos produits en WebP,
- * stockées dans public/uploads/products/{nom}-{largeur}.webp.
+ * Attributs d'image (src, srcset, dimensions) des photos en WebP,
+ * stockées dans public/uploads/{dossier}/{nom}-{largeur}.webp.
  */
-final class ProductImageExtension extends AbstractExtension
+final class ImageExtension extends AbstractExtension
 {
-    public const string PUBLIC_DIR = '/uploads/products';
+    public const string PUBLIC_DIR = '/uploads';
 
     /** Motif d'illustration provisoire selon la catégorie SumUp. */
     private const array MOTIFS = [
@@ -31,15 +31,20 @@ final class ProductImageExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('product_image', $this->productImage(...)),
+            new TwigFunction('image_attrs', $this->imageAttrs(...)),
             new TwigFunction('glass_motif', $this->glassMotif(...)),
         ];
+    }
+
+    public static function url(ResponsiveImage $image, int $width): string
+    {
+        return \sprintf('%s/%s/%s-%d.webp', self::PUBLIC_DIR, $image::uploadFolder(), $image->getFilename(), $width);
     }
 
     /**
      * @return array{src: string, large: string, srcset: string, sizes: string, width: int, height: int, alt: string}|null
      */
-    public function productImage(?ProductImage $image, string $sizes = '(min-width: 74rem) 18rem, (min-width: 48rem) 33vw, 100vw'): ?array
+    public function imageAttrs(?ResponsiveImage $image, string $sizes = '(min-width: 74rem) 18rem, (min-width: 48rem) 33vw, 100vw'): ?array
     {
         if (null === $image || null === $image->getFilename() || [] === $image->getWidths()) {
             return null;
@@ -47,13 +52,12 @@ final class ProductImageExtension extends AbstractExtension
 
         $widths = $image->getWidths();
         sort($widths);
-        $url = static fn (int $width): string => \sprintf('%s/%s-%d.webp', self::PUBLIC_DIR, $image->getFilename(), $width);
 
         return [
-            'src' => $url($widths[(int) floor((\count($widths) - 1) / 2)]),
+            'src' => self::url($image, $widths[(int) floor((\count($widths) - 1) / 2)]),
             // Plus grande version (visionneuse plein écran, lien sans JavaScript).
-            'large' => $url($widths[\count($widths) - 1]),
-            'srcset' => implode(', ', array_map(static fn (int $w): string => $url($w).' '.$w.'w', $widths)),
+            'large' => self::url($image, $widths[\count($widths) - 1]),
+            'srcset' => implode(', ', array_map(static fn (int $w): string => self::url($image, $w).' '.$w.'w', $widths)),
             'sizes' => $sizes,
             'width' => $image->getWidth(),
             'height' => $image->getHeight(),

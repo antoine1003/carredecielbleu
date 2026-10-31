@@ -1,0 +1,30 @@
+{#
+    Vidéo d'un atelier. Lien YouTube : vignette locale (rien n'est chargé depuis YouTube) puis, au clic,
+    lecteur youtube-nocookie (contrôleur Stimulus « video »). Sans JavaScript, la vignette est un lien
+    vers YouTube. Autre lien : simple bouton vers la vidéo.
+    Variables : url, title.
+#}
+{% set youtube = youtube_id(url) %}
+<section class="video-block" aria-labelledby="video-titre">
+    <h2 id="video-titre" class="video-block__title">L'atelier en vidéo</h2>
+    {% if youtube %}
+        <div class="video" data-controller="video" data-video-id-value="{{ youtube }}" data-video-title-value="Vidéo : {{ title }}">
+            <a class="video__poster" href="{{ url }}" target="_blank" rel="noopener noreferrer" data-action="video#play" data-video-target="poster">
+                <twig:Shards />
+                <span class="video__play">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+                    Lire la vidéo
+                </span>
+            </a>
+        </div>
+        <p class="video-block__note">La vidéo est hébergée sur YouTube : elle ne se charge que si vous cliquez, et YouTube peut alors collecter des données de navigation.</p>
+    {% else %}
+        <p>
+            <a class="btn btn--secondary" href="{{ url }}" target="_blank" rel="noopener noreferrer">
+                Voir la vidéo
+                <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2 7 9"/></svg>
+                <span class="visually-hidden">(nouvel onglet)</span>
+            </a>
+        </p>
+    {% endif %}
+</section>

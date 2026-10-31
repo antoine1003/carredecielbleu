@@ -72,9 +72,22 @@ class Workshop
     #[ORM\OrderBy(['startsAt' => 'ASC'])]
     private Collection $sessions;
 
+    /** @var Collection<int, WorkshopImage> Photos (réalisations, lieu…), la première est la principale. */
+    #[ORM\OneToMany(targetEntity: WorkshopImage::class, mappedBy: 'workshop', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC', 'id' => 'ASC'])]
+    #[Assert\Valid]
+    private Collection $images;
+
+    /** Lien vers une vidéo : YouTube (lecteur intégré au clic) ou toute autre page (lien simple). */
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Url(protocols: ['https'], requireTld: true, message: 'Indiquez une adresse complète commençant par https://')]
+    #[Assert\Length(max: 500)]
+    private ?string $videoUrl = null;
+
     public function __construct()
     {
         $this->sessions = new ArrayCollection();
+        $this->images = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -214,6 +227,41 @@ class Workshop
     public function removeSession(WorkshopSession $session): static
     {
         $this->sessions->removeElement($session);
+
+        return $this;
+    }
+
+    /** @return Collection<int, WorkshopImage> */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(WorkshopImage $image): static
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setWorkshop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(WorkshopImage $image): static
+    {
+        $this->images->removeElement($image);
+
+        return $this;
+    }
+
+    public function getVideoUrl(): ?string
+    {
+        return $this->videoUrl;
+    }
+
+    public function setVideoUrl(?string $videoUrl): static
+    {
+        $this->videoUrl = $videoUrl;
 
         return $this;
     }

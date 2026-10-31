@@ -6,7 +6,7 @@
     :fromPrice="view.fromPrice"
     :status="view.availability.value"
     :purchaseUrl="view.canBuy ? view.product.purchaseUrl : null"
-    :image="product_image(view.product.images.first ?: null)"
+    :image="image_attrs(view.product.images.first ?: null)"
     :motif="glass_motif(view.product)"
     :headingLevel="headingLevel ?? 3"
 />

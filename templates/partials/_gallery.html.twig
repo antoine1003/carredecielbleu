@@ -1,0 +1,79 @@
+{#
+    Galerie de photos défilantes (glisser au doigt, flèches, miniatures) avec visionneuse
+    plein écran au clic (contrôleur Stimulus « gallery »). Sans JavaScript : les photos défilent
+    toujours et chaque photo ouvre sa grande version. Ne rien afficher s'il n'y a pas de photo.
+    Variables : photos (ProductImage, WorkshopImage…), label (nom du produit ou de l'atelier),
+    sizes (facultatif).
+#}
+{% set images = [] %}
+{% for photo in photos %}
+    {% set attrs = image_attrs(photo, sizes ?? '(min-width: 64rem) 34rem, 92vw') %}
+    {% if attrs %}{% set images = images|merge([attrs]) %}{% endif %}
+{% endfor %}
+{% set count = images|length %}
+
+{% if count > 0 %}
+    <div class="gallery" data-controller="gallery" data-gallery-count-value="{{ count }}">
+        <div class="gallery__viewport">
+            <ul class="gallery__track" data-gallery-target="track" data-action="scroll->gallery#onScroll"
+                tabindex="0" aria-label="Photos de {{ label }}{{ count > 1 ? ', faire défiler pour en voir d\'autres' }}">
+                {% for img in images %}
+                    <li class="gallery__slide" data-gallery-target="slide">
+                        <a class="gallery__zoom lancet" href="{{ img.large }}" data-action="gallery#open" data-index="{{ loop.index0 }}"
+                           aria-label="Agrandir la photo {{ loop.index }} sur {{ count }}{{ img.alt ? ' : ' ~ img.alt }}">
+                            <img src="{{ img.src }}" srcset="{{ img.srcset }}" sizes="{{ img.sizes }}"
+                                 width="{{ img.width }}" height="{{ img.height }}" alt="{{ img.alt }}"
+                                 {% if loop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async">
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if count > 1 %}
+                <button class="gallery__arrow gallery__arrow--prev" type="button" data-action="gallery#previous" data-gallery-target="previous" aria-label="Photo précédente">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+                </button>
+                <button class="gallery__arrow gallery__arrow--next" type="button" data-action="gallery#next" data-gallery-target="next" aria-label="Photo suivante">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+                </button>
+                <p class="gallery__counter" aria-live="polite"><span data-gallery-target="counter">1</span> / {{ count }}</p>
+            {% endif %}
+        </div>
+
+        {% if count > 1 %}
+            <ul class="gallery__thumbs">
+                {% for img in images %}
+                    <li>
+                        <button class="gallery__thumb" type="button" data-action="gallery#goTo" data-index="{{ loop.index0 }}" data-gallery-target="thumb"
+                                aria-label="Voir la photo {{ loop.index }} sur {{ count }}"{% if loop.first %} aria-current="true"{% endif %}>
+                            <img src="{{ img.src }}" srcset="{{ img.srcset }}" sizes="5rem" width="{{ img.width }}" height="{{ img.height }}" alt="" loading="lazy" decoding="async">
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {# Visionneuse plein écran (élément <dialog> natif : Échap, focus, arrière-plan inerte) #}
+        <dialog class="lightbox" data-gallery-target="dialog" aria-label="Photos de {{ label }} en grand" data-action="click->gallery#closeOnBackdrop keydown->gallery#onKey">
+            <ul class="lightbox__track" data-gallery-target="lightboxTrack" data-action="scroll->gallery#onLightboxScroll">
+                {% for img in images %}
+                    <li class="lightbox__slide">
+                        <img src="{{ img.large }}" srcset="{{ img.srcset }}" sizes="100vw" width="{{ img.width }}" height="{{ img.height }}" alt="{{ img.alt }}" loading="lazy" decoding="async">
+                    </li>
+                {% endfor %}
+            </ul>
+            <button class="lightbox__close" type="button" data-action="gallery#close" aria-label="Fermer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+            </button>
+            {% if count > 1 %}
+                <button class="lightbox__arrow lightbox__arrow--prev" type="button" data-action="gallery#previous" aria-label="Photo précédente">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+                </button>
+                <button class="lightbox__arrow lightbox__arrow--next" type="button" data-action="gallery#next" aria-label="Photo suivante">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+                </button>
+                <p class="lightbox__counter" aria-live="polite"><span data-gallery-target="lightboxCounter">1</span> / {{ count }}</p>
+            {% endif %}
+        </dialog>
+    </div>
+{% endif %}

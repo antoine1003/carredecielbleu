@@ -27,9 +27,9 @@
 
     {% if message and message.type == 'success' %}
         {# Inscription réussie : le formulaire laisse place au remerciement #}
-        <p class="newsletter__form newsletter__message newsletter__message--success" role="status" tabindex="-1" data-controller="autofocus">
-            <svg class="btn__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M3 8.5 6.5 12 13 4"/></svg>
-            {{ message.text }}
+        <p class="newsletter__form newsletter__thanks newsletter__message newsletter__message--success" role="status" tabindex="-1" data-controller="autofocus">
+            <span class="newsletter__thanks-icon" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg></span>
+            <span>{{ message.text }}</span>
         </p>
     {% else %}
         <form class="newsletter__form" method="post" action="{{ path('app_newsletter_subscribe') }}">

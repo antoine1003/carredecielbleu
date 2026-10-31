@@ -53,6 +53,11 @@
     --color-lead: var(--palette-encre);         /* « plombs » des illustrations */
 
     --color-status-available: var(--palette-salicorne-fonce);
+
+    /* Messages de réussite (inscription enregistrée, annulation faite…) */
+    --color-success: var(--palette-salicorne-fonce);
+    --color-success-bg: color-mix(in srgb, var(--palette-salicorne) 14%, var(--palette-blanc));
+    --color-success-border: color-mix(in srgb, var(--palette-salicorne) 45%, var(--palette-blanc));
     --color-status-made-to-order: var(--palette-estuaire);
     --color-status-sold-out: var(--palette-gris-bleu);
     --color-error: var(--palette-grenat);

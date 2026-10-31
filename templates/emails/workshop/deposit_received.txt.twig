@@ -1,0 +1,22 @@
+{% autoescape false %}
+{%- set policy = deposit_policy() -%}
+Bonjour {{ firstName }},
+
+J'ai bien reçu votre acompte de {{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}, merci ! Votre inscription à l'atelier « {{ workshop.title }} » est définitivement validée.
+
+{{ session.startsAt|format_datetime('full', 'short', locale: 'fr')|capitalize }}{% if session.effectiveLocation %}
+
+{{ session.effectiveLocation }}{% endif %}
+
+
+{% if workshop.duration %}Durée : {{ workshop.duration }}.
+
+{% endif %}
+{{ policy.refundDaysBefore > 0 and policy.refundLimit(session)
+    ? 'Un empêchement ? Jusqu\'au ' ~ policy.refundLimit(session)|format_date('long', locale: 'fr') ~ ', l\'acompte vous est remboursé si vous annulez votre inscription. Passé ce délai, il reste acquis.'
+    : 'Un empêchement ? Prévenez-moi en annulant votre inscription.' }}
+Annuler mon inscription : {{ cancelUrl }}
+
+À très bientôt à l'atelier,
+{{ site_settings().siteName }}
+{% endautoescape %}

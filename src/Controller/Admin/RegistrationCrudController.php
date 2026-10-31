@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Entity\Registration;
 use App\Repository\RegistrationRepository;
 use App\Service\Workshop\RegistrationCsvExporter;
+use App\Service\Workshop\WorkshopMailer;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -36,18 +37,22 @@ final class RegistrationCrudController extends AbstractCrudController
 {
     /** Coche ou décoche « Acompte reçu » (bouton du suivi de l'atelier). */
     #[AdminRoute('/{id}/acompte', name: 'deposit', options: ['methods' => ['POST']])]
-    public function toggleDeposit(#[MapEntity(id: 'id')] Registration $registration, Request $request, EntityManagerInterface $entityManager, ClockInterface $clock): RedirectResponse
+    public function toggleDeposit(#[MapEntity(id: 'id')] Registration $registration, Request $request, EntityManagerInterface $entityManager, ClockInterface $clock, WorkshopMailer $mailer): RedirectResponse
     {
         if (!$this->isCsrfTokenValid('deposit'.$registration->getId(), $request->request->getString('_token'))) {
             $this->addFlash('danger', 'Le formulaire a expiré, merci de recommencer.');
         } else {
             $registration->setDepositPaidAt($registration->isDepositPaid() ? null : $clock->now());
             $entityManager->flush();
-            $this->addFlash('success', \sprintf(
-                $registration->isDepositPaid() ? 'Acompte de %s %s noté comme reçu.' : 'Acompte de %s %s remis « en attente ».',
-                $registration->getFirstName(),
-                $registration->getLastName(),
-            ));
+            $name = $registration->getFirstName().' '.$registration->getLastName();
+
+            if (!$registration->isDepositPaid()) {
+                $this->addFlash('success', \sprintf('Acompte de %s remis « en attente ».', $name));
+            } elseif ($mailer->sendDepositReceived($registration)) {
+                $this->addFlash('success', \sprintf('Acompte de %s noté comme reçu. Un email lui confirme que son inscription est validée.', $name));
+            } else {
+                $this->addFlash('warning', \sprintf('Acompte de %s noté comme reçu, mais l\'email de confirmation n\'a pas pu être envoyé : prévenez-la directement.', $name));
+            }
         }
 
         return $this->redirectToRoute('admin_workshop_planning', ['id' => $registration->getSession()?->getWorkshop()?->getId()]);

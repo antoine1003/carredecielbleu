@@ -47,9 +47,10 @@
                 {{ include('partials/_flashes.html.twig') }}
 
                 {% if result %}
-                    <div class="notice stack" role="status">
+                    <div class="notice {{ result.created > 0 or result.existing > 0 ? 'notice--success' }}" role="status">
                         {% if result.created > 0 or result.existing > 0 %}
-                            <p><strong>Merci, votre inscription est enregistrée.</strong></p>
+                            <p><strong>Merci, votre inscription est enregistrée !</strong></p>
+                            <p>Dès que la date de l'atelier sera fixée, vous recevrez un email de confirmation{{ deposit_required ? ', avec le lien pour régler l\'acompte' }}.</p>
                             {% if result.emailSent is same as(true) %}
                                 <p>Un email récapitulatif vient de vous être envoyé, avec un lien pour annuler si besoin.</p>
                             {% elseif result.emailSent is same as(false) %}

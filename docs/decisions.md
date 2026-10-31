@@ -141,3 +141,8 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Annulation : message adapté (remboursé / conservé) avant et après l'annulation ; email à l'artisane pour toute annulation d'une date confirmée.
 - Juridique (à faire valider par l'artisane : comptable, CMA) : pour une activité de loisir à date déterminée, le droit de rétractation de 14 jours ne s'applique normalement pas, mais les conditions doivent être claires et acceptées avant paiement.
 - Migration `Version20261031135213`. Vérifié de bout en bout sur un atelier de test (supprimé ensuite) : refus sans case cochée, inscription, emails (récapitulatif, confirmation avec acompte, relance) dans MailDev, « Acompte reçu », page d'annulation dans les deux cas (remboursé / conservé), annulation réelle et email à l'artisane.
+
+## 2026-10-31 — Message de réussite et email « acompte reçu »
+
+- Messages de réussite du site (inscription enregistrée, annulation faite, messages flash « success ») : alerte verte `notice--success` (fond vert pâle, pastille cochée), couleurs `--color-success*` dans les tokens. Après inscription, le message rappelle la suite (email de confirmation, lien d'acompte si l'atelier en demande un).
+- Quand l'artisane clique « Acompte reçu » dans le suivi, la personne reçoit l'email « Votre place est réservée » (inscription définitivement validée, date limite de remboursement, lien d'annulation). Rien n'est envoyé si l'acompte est saisi à la main dans la fiche d'inscription, ni quand on décoche.

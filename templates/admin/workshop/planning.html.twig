@@ -62,7 +62,7 @@
                                     {% if r.depositReminderSentAt and not r.depositPaid %}<span>relancé le {{ r.depositReminderSentAt|format_date(pattern: 'd MMM', locale: 'fr') }}</span>{% endif %}
                                     <form method="post" action="{{ path('admin_registration_deposit', {id: r.id}) }}" class="ws-deposit-toggle">
                                         <input type="hidden" name="_token" value="{{ csrf_token('deposit' ~ r.id) }}">
-                                        <button type="submit" class="btn btn-sm {{ r.depositPaid ? 'btn-link' : 'btn-secondary' }}">{{ r.depositPaid ? 'Annuler' : 'Acompte reçu' }}</button>
+                                        <button type="submit" class="btn btn-sm {{ r.depositPaid ? 'btn-link' : 'btn-secondary' }}"{% if not r.depositPaid %} title="Note l'acompte comme reçu et envoie à la personne un email : inscription validée"{% endif %}>{{ r.depositPaid ? 'Annuler' : 'Acompte reçu' }}</button>
                                     </form>
                                 {% endif %}
                             </li>

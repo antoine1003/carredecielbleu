@@ -1,0 +1,21 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block subject %}Votre place est réservée : atelier « {{ workshop.title }} »{% endblock %}
+
+{% block content %}
+    <p style="margin:0 0 16px;">Bonjour {{ firstName }},</p>
+    <p style="margin:0 0 16px;">J'ai bien reçu votre acompte de <strong>{{ (workshop.depositCents / 100)|format_currency('EUR', locale: 'fr') }}</strong>, merci ! Votre inscription à l'atelier <strong>« {{ workshop.title }} »</strong> est définitivement validée.</p>
+    <p style="margin:0 0 16px; padding:16px; background:{{ mail.mist }}; border-radius:8px;">
+        {{ include('emails/workshop/_session.html.twig') }}
+    </p>
+    {% if workshop.duration %}<p style="margin:0 0 16px;">Durée : {{ workshop.duration }}.</p>{% endif %}
+    <p style="margin:0 0 16px; font-size:14px; color:{{ mail.muted }};">
+        {% set policy = deposit_policy() %}
+        {% if policy.refundDaysBefore > 0 and policy.refundLimit(session) %}
+            Un empêchement ? Jusqu'au {{ policy.refundLimit(session)|format_date('long', locale: 'fr') }}, l'acompte vous est remboursé si vous <a href="{{ cancelUrl }}" style="color:{{ mail.link }};">annulez votre inscription</a>. Passé ce délai, il reste acquis.
+        {% else %}
+            Un empêchement ? Prévenez-moi en <a href="{{ cancelUrl }}" style="color:{{ mail.link }};">annulant votre inscription</a>.
+        {% endif %}
+    </p>
+    <p style="margin:0;">À très bientôt à l'atelier,<br>{{ site_settings().siteName }}</p>
+{% endblock %}

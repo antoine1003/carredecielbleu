@@ -96,6 +96,24 @@ final readonly class WorkshopMailer
         );
     }
 
+    /** Acompte reçu : l'inscription est définitivement validée. */
+    public function sendDepositReceived(Registration $registration): bool
+    {
+        $session = $registration->getSession();
+
+        return $this->send(
+            (string) $registration->getEmail(),
+            'Votre place est réservée : atelier « '.$session?->getWorkshop()?->getTitle().' »',
+            'emails/workshop/deposit_received',
+            [
+                'firstName' => $registration->getFirstName(),
+                'session' => $session,
+                'workshop' => $session?->getWorkshop(),
+                'cancelUrl' => $this->cancelUrl($registration),
+            ],
+        );
+    }
+
     /** Relance : l'acompte n'est pas encore arrivé. */
     public function sendDepositReminder(Registration $registration): bool
     {

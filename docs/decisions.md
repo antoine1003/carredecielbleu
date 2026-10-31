@@ -67,3 +67,12 @@ Journal des décisions prises pendant le développement. Les règles durables so
 - Vérifié avec un faux serveur Brevo local (`BREVO_API_URL`) : requête, en-tête `api-key`, corps JSON, cas d'erreur 401. Pas encore testé avec un vrai compte Brevo.
 - Piste RGPD non retenue pour l'instant : le double opt-in Brevo (email de confirmation avant ajout à la liste), activable plus tard via `POST /v3/contacts/doubleOptinConfirmation`.
 - `symfony/http-client` déclaré explicitement. Mise à jour corrective Symfony 8.1.10 (faille CVE-2026-45070 dans `symfony/mime`).
+
+## 2026-10-31 — Anti-robots : captcha ALTCHA
+
+- Constat : CSRF + champ piège + limitation de débit arrêtent le spam de masse, mais pas un robot ciblé ; risques réels = fausses inscriptions qui occupent les places des ateliers, et inscription d'adresses de tiers à la newsletter (simple opt-in).
+- Choix : ALTCHA auto-hébergé (preuve de travail PBKDF2 calculée par le navigateur), retenu plutôt que Cloudflare Turnstile ou Google reCAPTCHA pour respecter « pas de tracker tiers » et éviter un bandeau cookies. Librairie PHP et widget sous licence MIT, gratuits ; rien à installer sur le VPS hors `composer install` / `importmap`.
+- Atelier : case visible qui se coche seule dès qu'on remplit le formulaire. Newsletter : mode invisible.
+- Serveur : preuve signée (clé `ALTCHA_HMAC_KEY`), valable 30 min, à usage unique (empreinte en cache jusqu'à expiration).
+- Vérifié : inscription réelle par le navigateur acceptée ; service testé directement (preuve valide acceptée ; rejouée, trafiquée, signée par une autre clé, absente ou sans clé serveur refusées). Les tests curl de bout en bout ont buté sur le CSRF (cookies de curl sous Git Bash), pas sur le captcha.
+- Correction au passage : texte des champs blanc sur blanc dans le bandeau newsletter (couleur héritée du bloc sombre).

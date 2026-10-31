@@ -8,12 +8,14 @@ use App\Entity\WorkshopSession;
 use App\Form\RegistrationType;
 use App\Repository\RegistrationRepository;
 use App\Repository\WorkshopRepository;
+use App\Service\AntiSpam\AltchaGuard;
 use App\Service\Workshop\RegistrationRequest;
 use App\Service\Workshop\RegistrationService;
 use App\Service\Workshop\SessionAvailability;
 use Psr\Clock\ClockInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
@@ -42,6 +44,7 @@ final class WorkshopController extends AbstractController
         string $slug,
         Request $request,
         RegistrationService $registrations,
+        AltchaGuard $altcha,
         #[Target('workshop_registration')]
         RateLimiterFactoryInterface $limiter,
     ): Response {
@@ -61,6 +64,11 @@ final class WorkshopController extends AbstractController
             // Piège à robots rempli : on fait comme si tout allait bien, sans rien enregistrer.
             if ('' !== trim((string) $form->get(RegistrationType::HONEYPOT)->getData())) {
                 return $this->redirectToRoute('app_workshop', ['slug' => $slug, 'inscription' => 'ok'], Response::HTTP_SEE_OTHER);
+            }
+
+            // Captcha ALTCHA : preuve absente, invalide ou déjà utilisée → formulaire refusé.
+            if (!$altcha->verify($request->request->getString(AltchaGuard::FIELD))) {
+                $form->addError(new FormError('La vérification anti-robots n\'a pas abouti. Patientez un instant qu\'elle se termine, puis renvoyez le formulaire.'));
             }
 
             if ($form->isValid()) {

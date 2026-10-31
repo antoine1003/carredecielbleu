@@ -60,6 +60,7 @@ Valeurs par défaut (placeholders) dans `.env` ; valeurs réelles dans `.env.loc
 | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Expéditeur des emails |
 | `BREVO_API_KEY` | Clé API Brevo pour la newsletter (secret : `.env.local` ou serveur). Vide = formulaire masqué |
 | `BREVO_API_URL` | Adresse de l'API Brevo (défaut `https://api.brevo.com/v3`) |
+| `ALTCHA_HMAC_KEY` | Clé secrète du captcha ALTCHA, **obligatoire en prod** (sans elle, inscriptions et newsletter sont refusées). Générer avec `php -r "echo bin2hex(random_bytes(32));"` |
 
 ## Déploiement (VPS Hostinger, Apache + PHP-FPM)
 

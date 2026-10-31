@@ -57,7 +57,7 @@
                     <p>Aucune date n'est proposée pour le moment.</p>
                 {% else %}
                     {{ form_start(form, {attr: {class: 'stack', novalidate: 'novalidate', action: path('app_workshop', {slug: workshop.slug}) ~ '#inscription'}}) }}
-                        {{ form_errors(form) }}
+                        {% for error in form.vars.errors %}<p class="notice notice--error" role="alert">{{ error.message }}</p>{% endfor %}
                         <fieldset class="date-options">
                             <legend class="date-options__legend">Dates qui vous conviennent</legend>
                             {% for error in form.sessions.vars.errors %}<p class="field__error" id="sessions_error">{{ error.message }}</p>{% endfor %}
@@ -103,6 +103,8 @@
                             {{ form_label(form.website) }}
                             {{ form_widget(form.website) }}
                         </div>
+
+                        <twig:Altcha />
 
                         <div><button class="btn btn--primary" type="submit">Je m'inscris à ces dates</button></div>
                     {{ form_end(form) }}

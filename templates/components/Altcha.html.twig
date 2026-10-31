@@ -1,0 +1,18 @@
+{#
+    Captcha anti-robots ALTCHA (preuve de travail calculée par le navigateur, sans service tiers ni cookie).
+    À placer DANS le <form> : le widget y ajoute le champ caché « altcha », vérifié côté serveur (AltchaGuard).
+    Usage : <twig:Altcha />  ou  <twig:Altcha display="invisible" />
+#}
+{% props display = 'standard' %}
+<div {{ attributes.defaults({class: 'captcha captcha--' ~ display}) }}>
+    <altcha-widget
+        data-controller="altcha"
+        challenge="{{ path('app_altcha_challenge') }}"
+        name="altcha"
+        language="fr"
+        auto="onfocus"
+        display="{{ display }}"
+        configuration="{{ {hideLogo: true, hideFooter: true}|json_encode }}"
+    ></altcha-widget>
+    <noscript><p class="field__error">Activez JavaScript pour valider ce formulaire (vérification anti-robots).</p></noscript>
+</div>

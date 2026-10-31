@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Service\AntiSpam\AltchaGuard;
 use App\Service\Newsletter\NewsletterSubscriber;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -25,6 +26,7 @@ final class NewsletterController extends AbstractController
         Request $request,
         NewsletterSubscriber $subscriber,
         ValidatorInterface $validator,
+        AltchaGuard $altcha,
         #[Target('newsletter_subscription')]
         RateLimiterFactoryInterface $limiter,
     ): RedirectResponse {
@@ -36,6 +38,10 @@ final class NewsletterController extends AbstractController
         // Champ piège rempli : on fait comme si tout allait bien, sans rien envoyer à Brevo.
         if ('' !== trim($request->request->getString('website'))) {
             return $this->flashAndBack('success', 'Merci, votre inscription est enregistrée.', $back);
+        }
+
+        if (!$altcha->verify($request->request->getString(AltchaGuard::FIELD))) {
+            return $this->flashAndBack('error', 'La vérification anti-robots n\'a pas abouti. Patientez un instant qu\'elle se termine, puis réessayez.', $back);
         }
 
         $email = trim($request->request->getString('email'));

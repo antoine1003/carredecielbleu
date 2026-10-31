@@ -30,6 +30,7 @@
                    autocomplete="email" placeholder="Votre adresse email" aria-describedby="newsletter-note-{{ variant }}">
             <button class="btn {{ variant == 'banner' ? 'btn--light' : 'btn--primary' }}" type="submit">M'abonner</button>
         </div>
+        <twig:Altcha display="invisible" />
         <div class="honeypot" aria-hidden="true">
             <label for="newsletter-website-{{ variant }}">Ne pas remplir ce champ</label>
             <input id="newsletter-website-{{ variant }}" type="text" name="website" tabindex="-1" autocomplete="off">
